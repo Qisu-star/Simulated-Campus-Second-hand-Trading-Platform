@@ -7,11 +7,17 @@ export function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  const user = getStoredUser();
-  const loggedIn = isAuthenticated();
+  // Wait for client-side hydration before accessing localStorage
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const user = mounted ? getStoredUser() : null;
+  const loggedIn = mounted ? isAuthenticated() : false;
 
   // Close dropdown on click outside
   useEffect(() => {

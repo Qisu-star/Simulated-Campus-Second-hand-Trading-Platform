@@ -44,6 +44,7 @@
     "is-extglob": "^2.1.1",
     "is-glob": "^4.0.3",
     "is-number": "^7.0.0",
+    "isexe": "^4.0.0",
     "mwtsc": "^1.16.0",
     "path-type": "^6.0.0",
     "to-regex-range": "^5.0.1",
