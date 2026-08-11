@@ -2,7 +2,8 @@
 
 import { use, useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import type { Item, ItemDetailResponse } from "@/lib/types";
+import { isAuthenticated } from "@/lib/auth";
+import type { Item, ItemDetailResponse, ToggleFavoriteResponse } from "@/lib/types";
 
 type PageState = "loading" | "error" | "notfound" | "success";
 
@@ -12,10 +13,12 @@ export default function ItemDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const [item, setItem] = useState<Item | null>(null);
+  const [item, setItem] = useState<(Item & { isItemFavorited: boolean; isSellerFavorited: boolean }) | null>(null);
   const [pageState, setPageState] = useState<PageState>("loading");
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [itemFavLoading, setItemFavLoading] = useState(false);
+  const [sellerFavLoading, setSellerFavLoading] = useState(false);
 
   const fetchItem = useCallback(async () => {
     setPageState("loading");
@@ -44,6 +47,60 @@ export default function ItemDetailPage({
   useEffect(() => {
     void fetchItem();
   }, [fetchItem]);
+
+  const handleToggleItemFavorite = useCallback(async () => {
+    if (!isAuthenticated()) {
+      window.location.href = "/auth/login";
+      return;
+    }
+
+    setItemFavLoading(true);
+    try {
+      const response = await api.post<ToggleFavoriteResponse>(
+        `/api/favorites/items/${id}`,
+      );
+      setItem((prev) =>
+        prev
+          ? {
+              ...prev,
+              isItemFavorited: response.data.action === "favorited",
+            }
+          : prev,
+      );
+    } catch (reason) {
+      // ignore
+    } finally {
+      setItemFavLoading(false);
+    }
+  }, [id]);
+
+  const handleToggleSellerFavorite = useCallback(async () => {
+    if (!isAuthenticated()) {
+      window.location.href = "/auth/login";
+      return;
+    }
+
+    if (!item) return;
+
+    setSellerFavLoading(true);
+    try {
+      const response = await api.post<ToggleFavoriteResponse>(
+        `/api/favorites/sellers/${item.sellerId}`,
+      );
+      setItem((prev) =>
+        prev
+          ? {
+              ...prev,
+              isSellerFavorited: response.data.action === "favorited",
+            }
+          : prev,
+      );
+    } catch (reason) {
+      // ignore
+    } finally {
+      setSellerFavLoading(false);
+    }
+  }, [item]);
 
   // Loading skeleton
   if (pageState === "loading") {
@@ -246,8 +303,114 @@ export default function ItemDetailPage({
             </a>
           </div>
 
+          {/* Favorite buttons */}
+          <div className="mt-6 flex gap-3">
+            <button
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl border py-3 text-base font-semibold transition disabled:opacity-50 ${
+                item.isItemFavorited
+                  ? "border-rose-300 bg-rose-50 text-rose-600 hover:bg-rose-100"
+                  : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+              disabled={itemFavLoading}
+              onClick={() => void handleToggleItemFavorite()}
+              type="button"
+            >
+              {itemFavLoading ? (
+                <svg
+                  className="h-5 w-5 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    fill="currentColor"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="h-5 w-5"
+                  fill={item.isItemFavorited ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
+                </svg>
+              )}
+              {item.isItemFavorited ? "已收藏" : "收藏商品"}
+            </button>
+            <button
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl border py-3 text-base font-semibold transition disabled:opacity-50 ${
+                item.isSellerFavorited
+                  ? "border-amber-300 bg-amber-50 text-amber-600 hover:bg-amber-100"
+                  : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+              disabled={sellerFavLoading}
+              onClick={() => void handleToggleSellerFavorite()}
+              type="button"
+            >
+              {sellerFavLoading ? (
+                <svg
+                  className="h-5 w-5 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    fill="currentColor"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="h-5 w-5"
+                  fill={item.isSellerFavorited ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
+                  <circle
+                    cx="9"
+                    cy="7"
+                    r="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
+                </svg>
+              )}
+              {item.isSellerFavorited ? "已收藏商家" : "收藏商家"}
+            </button>
+          </div>
+
           {/* Action buttons */}
-          <div className="mt-8 space-y-3">
+          <div className="mt-3 space-y-3">
             {isSoldOut ? (
               <button
                 className="w-full cursor-not-allowed rounded-xl bg-slate-300 py-3 text-base font-semibold text-slate-500"

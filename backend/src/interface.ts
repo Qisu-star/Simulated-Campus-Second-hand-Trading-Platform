@@ -78,3 +78,36 @@ export interface ItemListResponse {
   total: number;
   totalPages: number;
 }
+
+export interface ToggleFavoriteResponse {
+  action: "favorited" | "unfavorited";
+}
+
+export interface FavoriteItemWithInfo {
+  id: number;
+  userId: number;
+  itemId: number;
+  createdAt: string;
+  item: Item;
+}
+
+export interface FavoriteSellerWithInfo {
+  id: number;
+  userId: number;
+  sellerId: number;
+  createdAt: string;
+  sellerName: string;
+  activeItemCount: number;
+}
+
+export interface FavoriteItemListResponse {
+  data: FavoriteItemWithInfo[];
+  total: number;
+  totalPages: number;
+}
+
+export interface FavoriteSellerListResponse {
+  data: FavoriteSellerWithInfo[];
+  total: number;
+  totalPages: number;
+}

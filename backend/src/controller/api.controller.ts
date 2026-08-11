@@ -2,6 +2,7 @@ import { Body, Controller, Get, Headers, httpError, Inject, Param, Patch, Post, 
 import { Context } from "@midwayjs/koa";
 import { AuthService } from "../service/auth.service";
 import { CourseService } from "../service/course.service";
+import { FavoriteService } from "../service/favorite.service";
 import { ItemService } from "../service/item.service";
 import { parseCourseInput } from "../utils/course-input";
 import { verifyToken } from "../utils/auth";
@@ -16,6 +17,9 @@ export class ApiController {
 
   @Inject()
   itemService: ItemService;
+
+  @Inject()
+  favoriteService: FavoriteService;
 
   @Inject()
   ctx: Context;
@@ -93,7 +97,10 @@ export class ApiController {
   }
 
   @Get("/items/:id")
-  async getItemById(@Param("id") id: string) {
+  async getItemById(
+    @Param("id") id: string,
+    @Headers("authorization") authorization?: string,
+  ) {
     const itemId = Number(id);
     if (!Number.isFinite(itemId)) {
       throw new httpError.BadRequestError("无效的商品 ID");
@@ -104,7 +111,18 @@ export class ApiController {
       throw new httpError.NotFoundError("商品不存在或已下架");
     }
 
-    return { data: item };
+    let isItemFavorited = false;
+    let isSellerFavorited = false;
+    const token = extractToken(authorization);
+    if (token) {
+      const payload = verifyToken(token);
+      if (payload) {
+        isItemFavorited = this.favoriteService.isItemFavorited(payload.userId, item.id);
+        isSellerFavorited = this.favoriteService.isSellerFavorited(payload.userId, item.sellerId);
+      }
+    }
+
+    return { data: { ...item, isItemFavorited, isSellerFavorited } };
   }
 
   @Post("/items")
@@ -366,6 +384,19 @@ function getCurrentUserFromToken(authorization: string | undefined): { userId: n
   }
 
   return { userId: payload.userId };
+}
+
+function extractToken(authorization: string | undefined): string | null {
+  if (!authorization || typeof authorization !== "string") {
+    return null;
+  }
+
+  const parts = authorization.split(" ");
+  if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") {
+    return null;
+  }
+
+  return parts[1];
 }
 
 function getCurrentUserName(authService: AuthService, authorization: string | undefined): string | null {

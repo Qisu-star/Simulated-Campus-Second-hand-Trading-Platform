@@ -14,4 +14,7 @@ export default {
   itemDatabase: {
     path: process.env.ITEM_DATABASE_PATH ?? "./data/items.sqlite",
   },
+  favoriteDatabase: {
+    path: process.env.FAVORITE_DATABASE_PATH ?? "./data/favorite.sqlite",
+  },
 } as MidwayConfig;

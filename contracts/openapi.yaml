@@ -607,6 +607,184 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/favorites/items:
+    get:
+      operationId: listFavoriteItems
+      summary: 获取收藏商品列表（需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码，从 1 开始
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        "200":
+          description: 收藏商品列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoriteItemListResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/favorites/items/{id}:
+    post:
+      operationId: toggleFavoriteItem
+      summary: 收藏商品（切换式，需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 商品 ID
+      responses:
+        "200":
+          description: 收藏切换成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToggleFavoriteResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: unfavoriteItem
+      summary: 取消收藏商品（需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 商品 ID
+      responses:
+        "200":
+          description: 取消收藏成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/favorites/sellers:
+    get:
+      operationId: listFavoriteSellers
+      summary: 获取收藏商家列表（需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码，从 1 开始
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        "200":
+          description: 收藏商家列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoriteSellerListResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/favorites/sellers/{id}:
+    post:
+      operationId: toggleFavoriteSeller
+      summary: 收藏商家（切换式，需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 商家 ID
+      responses:
+        "200":
+          description: 收藏切换成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToggleFavoriteResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: unfavoriteSeller
+      summary: 取消收藏商家（需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 商家 ID
+      responses:
+        "200":
+          description: 取消收藏成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     bearerAuth:
@@ -747,6 +925,12 @@ components:
           type: string
           format: date-time
           nullable: true
+        isItemFavorited:
+          type: boolean
+          description: 当前用户是否收藏该商品（仅登录用户返回有效值）
+        isSellerFavorited:
+          type: boolean
+          description: 当前用户是否收藏该商家（仅登录用户返回有效值）
     ItemListResponse:
       type: object
       required: [data, total, totalPages]
@@ -837,3 +1021,70 @@ components:
         createdAt:
           type: string
           format: date-time
+    ToggleFavoriteResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [action]
+          properties:
+            action:
+              type: string
+              enum: [favorited, unfavorited]
+    FavoriteItemWithInfo:
+      type: object
+      required: [id, userId, itemId, createdAt, item]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        itemId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        item:
+          $ref: "#/components/schemas/Item"
+    FavoriteItemListResponse:
+      type: object
+      required: [data, total, totalPages]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FavoriteItemWithInfo"
+        total:
+          type: integer
+        totalPages:
+          type: integer
+    FavoriteSellerWithInfo:
+      type: object
+      required: [id, userId, sellerId, createdAt, sellerName, activeItemCount]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        sellerId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        sellerName:
+          type: string
+        activeItemCount:
+          type: integer
+    FavoriteSellerListResponse:
+      type: object
+      required: [data, total, totalPages]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FavoriteSellerWithInfo"
+        total:
+          type: integer
+        totalPages:
+          type: integer
