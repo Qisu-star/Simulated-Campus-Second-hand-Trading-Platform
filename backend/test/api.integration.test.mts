@@ -252,7 +252,12 @@ async function withTemporaryDatabase(
   try {
     await run(join(directory, "courses.sqlite"));
   } finally {
-    await rm(directory, { recursive: true, force: true });
+    try {
+      await rm(directory, { recursive: true, force: true });
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      await rm(directory, { recursive: true, force: true }).catch(() => {});
+    }
   }
 }
 
@@ -261,6 +266,7 @@ async function openApplication(databasePath: string) {
     baseDir: compiledSourceDirectory,
     globalConfig: {
       courseDatabase: { path: databasePath },
+      authDatabase: { path: databasePath.replace("courses.sqlite", "auth.sqlite") },
       koa: { port: null },
     },
   });

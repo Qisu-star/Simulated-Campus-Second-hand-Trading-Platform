@@ -63,6 +63,16 @@ export interface CreateItemInput {
   coverImage: string;
 }
 
+export interface UpdateItemInput {
+  title?: string;
+  price?: number;
+  quantity?: number;
+  description?: string;
+  category?: string;
+  images?: string[];
+  coverImage?: string;
+}
+
 export interface ItemListResponse {
   data: Item[];
   total: number;

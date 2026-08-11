@@ -2,7 +2,7 @@ import { Config, Destroy, Init, Provide } from "@midwayjs/core";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { Item, ItemListResponse } from "../interface";
+import type { CreateItemInput, Item, ItemListResponse, UpdateItemInput } from "../interface";
 
 type ItemRow = {
   id: number;
@@ -286,9 +286,205 @@ export class ItemService {
     return [...CATEGORIES];
   }
 
+  createItem(sellerId: number, sellerName: string, input: CreateItemInput): Item {
+    if (!this.database) {
+      throw new Error("数据库未初始化");
+    }
+
+    const images = JSON.stringify(input.images || []);
+    const coverImage = input.coverImage || (input.images && input.images.length > 0 ? input.images[0] : "");
+    const quantityUpdatedAt = input.quantity === 0 ? new Date().toISOString().replace("T", " ").slice(0, 19) : null;
+
+    const result = this.database
+      .prepare(`
+        INSERT INTO items (title, price, quantity, description, images, cover_image, category, seller_id, seller_name, status, quantity_updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+      `)
+      .run(
+        input.title,
+        input.price,
+        input.quantity,
+        input.description || "",
+        images,
+        coverImage,
+        input.category,
+        sellerId,
+        sellerName,
+        quantityUpdatedAt,
+      );
+
+    const row = this.database
+      .prepare(
+        `SELECT id, title, price, quantity, description, images, cover_image, category, seller_id, seller_name, status, created_at, quantity_updated_at
+         FROM items WHERE id = ?`,
+      )
+      .get(result.lastInsertRowid) as ItemRow;
+
+    return mapItem(row);
+  }
+
+  updateItem(userId: number, itemId: number, input: UpdateItemInput): Item {
+    if (!this.database) {
+      throw new Error("数据库未初始化");
+    }
+
+    const row = this.database
+      .prepare(
+        `SELECT id, title, price, quantity, description, images, cover_image, category, seller_id, seller_name, status, created_at, quantity_updated_at
+         FROM items WHERE id = ?`,
+      )
+      .get(itemId) as ItemRow | undefined;
+
+    if (!row) {
+      throw new Error("商品不存在");
+    }
+
+    if (row.seller_id !== userId) {
+      throw new Error("无权修改此商品");
+    }
+
+    const updates: string[] = [];
+    const params: (string | number | null)[] = [];
+
+    if (input.title !== undefined) {
+      updates.push("title = ?");
+      params.push(input.title);
+    }
+    if (input.price !== undefined) {
+      updates.push("price = ?");
+      params.push(input.price);
+    }
+    if (input.quantity !== undefined) {
+      updates.push("quantity = ?");
+      params.push(input.quantity);
+    }
+    if (input.description !== undefined) {
+      updates.push("description = ?");
+      params.push(input.description);
+    }
+    if (input.category !== undefined) {
+      updates.push("category = ?");
+      params.push(input.category);
+    }
+    if (input.images !== undefined) {
+      const imagesJson = JSON.stringify(input.images);
+      updates.push("images = ?");
+      params.push(imagesJson);
+      // Update cover_image if first image is provided
+      if (input.images.length > 0) {
+        updates.push("cover_image = ?");
+        params.push(input.images[0]);
+      }
+    }
+    if (input.coverImage !== undefined) {
+      updates.push("cover_image = ?");
+      params.push(input.coverImage);
+    }
+
+    // If quantity is being updated to 0, set quantity_updated_at
+    if (input.quantity !== undefined && input.quantity === 0) {
+      updates.push("quantity_updated_at = ?");
+      params.push(new Date().toISOString().replace("T", " ").slice(0, 19));
+    } else if (input.quantity !== undefined && input.quantity > 0) {
+      updates.push("quantity_updated_at = NULL");
+    }
+
+    // If delisted -> re-submit for review (set to pending)
+    if (row.status === "delisted") {
+      updates.push("status = 'pending'");
+    }
+
+    if (updates.length === 0) {
+      return mapItem(row);
+    }
+
+    params.push(itemId);
+    this.database
+      .prepare(`UPDATE items SET ${updates.join(", ")} WHERE id = ?`)
+      .run(...params);
+
+    const updatedRow = this.database
+      .prepare(
+        `SELECT id, title, price, quantity, description, images, cover_image, category, seller_id, seller_name, status, created_at, quantity_updated_at
+         FROM items WHERE id = ?`,
+      )
+      .get(itemId) as ItemRow;
+
+    return mapItem(updatedRow);
+  }
+
+  updateItemStatus(userId: number, itemId: number, status: string): void {
+    if (!this.database) {
+      throw new Error("数据库未初始化");
+    }
+
+    if (status !== "delisted" && status !== "active") {
+      throw new Error("无效的状态变更");
+    }
+
+    const row = this.database
+      .prepare("SELECT id, seller_id FROM items WHERE id = ?")
+      .get(itemId) as { id: number; seller_id: number } | undefined;
+
+    if (!row) {
+      throw new Error("商品不存在");
+    }
+
+    if (row.seller_id !== userId) {
+      throw new Error("无权修改此商品");
+    }
+
+    this.database
+      .prepare("UPDATE items SET status = ? WHERE id = ?")
+      .run(status, itemId);
+  }
+
+  listMyItems(userId: number, page: number, pageSize: number): ItemListResponse {
+    if (!this.database) {
+      return { data: [], total: 0, totalPages: 1 };
+    }
+
+    this.autoDelistExpiredItems();
+
+    const conditions = ["seller_id = ?"];
+    const params: (string | number)[] = [userId];
+
+    const countRow = this.database
+      .prepare(`SELECT COUNT(*) AS total FROM items WHERE ${conditions.join(" AND ")}`)
+      .get(...params) as { total: number };
+
+    const total = countRow.total;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const offset = (page - 1) * pageSize;
+
+    const rows = this.database
+      .prepare(
+        `SELECT id, title, price, quantity, description, images, cover_image, category, seller_id, seller_name, status, created_at, quantity_updated_at
+         FROM items WHERE ${conditions.join(" AND ")}
+         ORDER BY created_at DESC
+         LIMIT ? OFFSET ?`,
+      )
+      .all(...params, pageSize, offset) as ItemRow[];
+
+    return {
+      data: rows.map(mapItem),
+      total,
+      totalPages,
+    };
+  }
+
   private autoDelistExpiredItems(): void {
-    // Future: check for items with expired listings
-    // For now, this is a placeholder for future expiration logic
+    if (!this.database) {
+      return;
+    }
+
+    this.database.exec(`
+      UPDATE items SET status = 'delisted'
+      WHERE status = 'active'
+        AND quantity = 0
+        AND quantity_updated_at IS NOT NULL
+        AND datetime(quantity_updated_at, '+7 days') <= datetime('now')
+    `);
   }
 
   @Destroy()

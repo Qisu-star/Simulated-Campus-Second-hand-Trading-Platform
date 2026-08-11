@@ -218,6 +218,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ItemListResponse"
+    post:
+      operationId: createItem
+      summary: 发布商品（需认证）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateItemRequest"
+      responses:
+        "201":
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Item"
+        "400":
+          description: 输入验证失败
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/items/search:
     get:
       operationId: searchItems
@@ -286,6 +320,133 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: 商品不存在或已下架
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateItem
+      summary: 编辑商品（需认证，仅拥有者）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateItemInput"
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Item"
+        "400":
+          description: 无效的输入
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: 无权修改此商品
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: 商品不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/items/{id}/status:
+    patch:
+      operationId: updateItemStatus
+      summary: 变更商品状态（下架/上架，需认证，仅拥有者）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateItemStatusInput"
+      responses:
+        "200":
+          description: 状态变更成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: 无效的状态
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: 无权修改此商品
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: 商品不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/items/mine:
+    get:
+      operationId: listMyItems
+      summary: 查看自己的商品（需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码，从 1 开始
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        "200":
+          description: 商品列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemListResponse"
+        "401":
+          description: 未登录
           content:
             application/json:
               schema:
@@ -459,3 +620,70 @@ components:
           type: integer
         totalPages:
           type: integer
+    CreateItemRequest:
+      type: object
+      additionalProperties: false
+      required: [title, price, quantity, category]
+      properties:
+        title:
+          type: string
+          description: 商品名称
+        price:
+          type: number
+          format: float
+          exclusiveMinimum: 0
+          description: 商品价格，必须大于 0
+        quantity:
+          type: integer
+          minimum: 0
+          description: 商品数量，必须为非负整数
+        description:
+          type: string
+          description: 商品描述（可选）
+        category:
+          type: string
+          description: 商品分类，必须是合法分类之一
+        images:
+          type: array
+          items:
+            type: string
+          description: 图片 URL 列表（可选）
+    UpdateItemInput:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+          description: 商品名称
+        price:
+          type: number
+          format: float
+          exclusiveMinimum: 0
+          description: 商品价格，必须大于 0
+        quantity:
+          type: integer
+          minimum: 0
+          description: 商品数量，必须为非负整数
+        description:
+          type: string
+          description: 商品描述
+        category:
+          type: string
+          description: 商品分类
+        images:
+          type: array
+          items:
+            type: string
+          description: 图片 URL 列表
+        coverImage:
+          type: string
+          description: 封面图片 URL
+    UpdateItemStatusInput:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [delisted, active]
+          description: 目标状态

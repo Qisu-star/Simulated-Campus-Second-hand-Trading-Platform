@@ -60,4 +60,7 @@ export const api = {
 
   put: <T = unknown>(path: string, body?: unknown) =>
     apiRequest<T>(path, { method: "PUT", body }),
+
+  patch: <T = unknown>(path: string, body?: unknown) =>
+    apiRequest<T>(path, { method: "PATCH", body }),
 };

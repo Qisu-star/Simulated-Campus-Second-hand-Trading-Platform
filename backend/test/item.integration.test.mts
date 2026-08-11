@@ -885,6 +885,7 @@ async function openApplication(databasePath: string) {
     baseDir: compiledSourceDirectory,
     globalConfig: {
       itemDatabase: { path: databasePath },
+      authDatabase: { path: databasePath.replace("items.sqlite", "auth.sqlite") },
       koa: { port: null },
     },
   });
