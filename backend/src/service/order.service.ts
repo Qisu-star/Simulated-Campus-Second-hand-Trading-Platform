@@ -178,6 +178,22 @@ export class OrderService {
       .run(orderId);
   }
 
+  getOrderById(id: number): Order | null {
+    if (!this.database) {
+      return null;
+    }
+
+    const row = this.database
+      .prepare("SELECT id, user_id, total_price, status, created_at FROM orders WHERE id = ?")
+      .get(id) as OrderRow | undefined;
+
+    if (!row) {
+      return null;
+    }
+
+    return this.mapOrder(row);
+  }
+
   private getOrderItems(orderId: number): OrderItem[] {
     if (!this.database) {
       return [];

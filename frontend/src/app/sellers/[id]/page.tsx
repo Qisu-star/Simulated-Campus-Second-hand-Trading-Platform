@@ -6,6 +6,7 @@ import { ItemCard } from "@/components/item-card";
 import { api } from "@/lib/api";
 import type { Category } from "@/lib/types";
 import type { Item, ItemListResponse } from "@/lib/types";
+import type { Review, ReviewListResponse } from "@/lib/types";
 
 type PageState = "loading" | "error" | "notfound" | "success" | "empty";
 
@@ -33,6 +34,13 @@ export default function SellerPage({
   const [selectedCategory, setSelectedCategory] = useState<Category>("全部");
   const [pageState, setPageState] = useState<PageState>("loading");
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Review state
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewTotal, setReviewTotal] = useState(0);
+  const [reviewTotalPages, setReviewTotalPages] = useState(1);
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   const pageSize = 20;
 
@@ -78,12 +86,29 @@ export default function SellerPage({
     [id],
   );
 
+  const fetchReviews = useCallback(async (pageNum: number) => {
+    setReviewLoading(true);
+    try {
+      const response = await api.get<ReviewListResponse>(
+        `/api/sellers/${id}/reviews?days=30&page=${pageNum}&pageSize=10`,
+      );
+      setReviews(response.data);
+      setReviewTotal(response.total);
+      setReviewTotalPages(response.totalPages);
+    } catch {
+      // ignore
+    } finally {
+      setReviewLoading(false);
+    }
+  }, [id]);
+
   const loadData = useCallback(async () => {
     const sellerOk = await fetchSeller();
     if (sellerOk) {
       await fetchSellerItems(page, selectedCategory);
+      await fetchReviews(1);
     }
-  }, [fetchSeller, fetchSellerItems, page, selectedCategory]);
+  }, [fetchSeller, fetchSellerItems, fetchReviews, page, selectedCategory]);
 
   useEffect(() => {
     void loadData();
@@ -96,6 +121,14 @@ export default function SellerPage({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, selectedCategory]);
+
+  // Re-fetch reviews when page changes
+  useEffect(() => {
+    if (seller) {
+      void fetchReviews(reviewPage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reviewPage]);
 
   const handleCategoryChange = (category: Category) => {
     setSelectedCategory(category);
@@ -337,17 +370,115 @@ export default function SellerPage({
         )}
       </section>
 
-      {/* Reviews placeholder section */}
+      {/* Reviews section */}
       <section
         aria-label="近期评价"
         className="mt-16 border-t border-slate-100 pt-10"
       >
         <h2 className="mb-6 text-xl font-bold text-slate-900">
-          近期评价
+          近期评价（近30天）
         </h2>
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500">
-          <p className="text-sm">暂无评价</p>
-        </div>
+
+        {reviewLoading ? (
+          <div className="animate-pulse space-y-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-24 rounded-xl bg-slate-200"
+              />
+            ))}
+          </div>
+        ) : reviews.length > 0 ? (
+          <div className="space-y-3">
+            <p className="text-sm text-slate-500">共 {reviewTotal} 条评价</p>
+
+            <div className="space-y-3">
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="rounded-xl border border-slate-200 bg-white p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-slate-600">
+                        {review.username.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-sm font-medium text-slate-700">
+                        {review.username}
+                      </span>
+                    </div>
+                    <span className="text-xs text-slate-400">
+                      {new Date(review.createdAt).toLocaleDateString("zh-CN", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+
+                  <div className="mt-2">
+                    <span className="inline-flex items-center gap-0.5">
+                      {Array.from({ length: 10 }).map((_, index) => (
+                        <span
+                          key={index}
+                          className={`inline-block h-2.5 w-2.5 rounded-full ${
+                            index < review.rating
+                              ? "bg-amber-400"
+                              : "bg-slate-200"
+                          }`}
+                        />
+                      ))}
+                      <span className="ml-1 text-sm font-bold text-amber-600">
+                        {review.rating}/10
+                      </span>
+                    </span>
+                  </div>
+
+                  {review.comment ? (
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                      {review.comment}
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-sm italic text-slate-400">
+                      用户未留下文字评价
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {reviewTotalPages > 1 && (
+              <nav
+                aria-label="评价分页"
+                className="flex items-center justify-center gap-4"
+              >
+                <button
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={reviewPage <= 1}
+                  onClick={() => setReviewPage((p) => Math.max(1, p - 1))}
+                  type="button"
+                >
+                  上一页
+                </button>
+                <span className="text-sm text-slate-600">
+                  第 {reviewPage} / {reviewTotalPages} 页
+                </span>
+                <button
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={reviewPage >= reviewTotalPages}
+                  onClick={() => setReviewPage((p) => Math.min(reviewTotalPages, p + 1))}
+                  type="button"
+                >
+                  下一页
+                </button>
+              </nav>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500">
+            <p className="text-sm">暂无评价</p>
+          </div>
+        )}
       </section>
     </main>
   );

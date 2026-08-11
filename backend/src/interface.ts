@@ -194,3 +194,29 @@ export interface OrderListResponse {
   total: number;
   totalPages: number;
 }
+
+// Review types
+export interface Review {
+  id: number;
+  userId: number;
+  orderId: number;
+  itemId: number;
+  sellerId: number;
+  rating: number;
+  comment: string;
+  username: string;
+  createdAt: string;
+}
+
+export interface CreateReviewInput {
+  orderId: number;
+  itemId: number;
+  rating: number;
+  comment?: string;
+}
+
+export interface ReviewListResponse {
+  data: Review[];
+  total: number;
+  totalPages: number;
+}

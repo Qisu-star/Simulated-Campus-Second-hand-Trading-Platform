@@ -552,6 +552,92 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/items/{id}/reviews:
+    get:
+      operationId: listItemReviews
+      summary: 获取商品评价列表
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 商品 ID
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码，从 1 开始
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        "200":
+          description: 评价列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewListResponse"
+        "400":
+          description: 无效的商品 ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/reviews:
+    post:
+      operationId: createReview
+      summary: 提交评价（需认证，仅已签收买家）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReviewInput"
+      responses:
+        "201":
+          description: 评价创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Review"
+        "400":
+          description: 参数错误或评分无效
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: 无权评价此订单
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: 已评价过
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/sellers/{id}/reviews:
     get:
       operationId: listSellerReviews
@@ -578,23 +664,20 @@ paths:
             maximum: 100
             default: 20
           description: 每页数量
+        - name: days
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 30
+          description: 查询近多少天的评价
       responses:
         "200":
-          description: 评价列表（暂为空）
+          description: 评价列表
           content:
             application/json:
               schema:
-                type: object
-                required: [data, total, totalPages]
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                  total:
-                    type: integer
-                  totalPages:
-                    type: integer
+                $ref: "#/components/schemas/ReviewListResponse"
         "400":
           description: 无效的商家 ID
           content:
@@ -1692,6 +1775,59 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Order"
+        total:
+          type: integer
+        totalPages:
+          type: integer
+    Review:
+      type: object
+      required: [id, userId, orderId, itemId, sellerId, rating, comment, username, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        orderId:
+          type: integer
+        itemId:
+          type: integer
+        sellerId:
+          type: integer
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 10
+        comment:
+          type: string
+        username:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    CreateReviewInput:
+      type: object
+      additionalProperties: false
+      required: [orderId, itemId, rating]
+      properties:
+        orderId:
+          type: integer
+        itemId:
+          type: integer
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 10
+        comment:
+          type: string
+          description: 评论文本（可选）
+    ReviewListResponse:
+      type: object
+      required: [data, total, totalPages]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Review"
         total:
           type: integer
         totalPages:

@@ -23,4 +23,7 @@ export default {
   tradeDatabase: {
     path: process.env.TRADE_DATABASE_PATH ?? "./data/trade.sqlite",
   },
+  reviewDatabase: {
+    path: process.env.REVIEW_DATABASE_PATH ?? "./data/review.sqlite",
+  },
 } as MidwayConfig;

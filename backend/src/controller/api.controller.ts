@@ -4,6 +4,7 @@ import { AuthService } from "../service/auth.service";
 import { CourseService } from "../service/course.service";
 import { FavoriteService } from "../service/favorite.service";
 import { ItemService } from "../service/item.service";
+import { ReviewService } from "../service/review.service";
 import { parseCourseInput } from "../utils/course-input";
 import { verifyToken } from "../utils/auth";
 
@@ -20,6 +21,9 @@ export class ApiController {
 
   @Inject()
   favoriteService: FavoriteService;
+
+  @Inject()
+  reviewService: ReviewService;
 
   @Inject()
   ctx: Context;
@@ -352,7 +356,12 @@ export class ApiController {
   }
 
   @Get("/sellers/:id/reviews")
-  async getSellerReviews(@Param("id") id: string) {
+  async getSellerReviews(
+    @Param("id") id: string,
+    @Query("days") days?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
+  ) {
     const sellerId = Number(id);
     if (!Number.isFinite(sellerId)) {
       throw new httpError.BadRequestError("无效的商家 ID");
@@ -363,7 +372,11 @@ export class ApiController {
       throw new httpError.NotFoundError("商家不存在");
     }
 
-    return { data: [], total: 0, totalPages: 1 };
+    const d = Math.max(1, Number(days) || 30);
+    const p = Math.max(1, Number(page) || 1);
+    const ps = Math.min(100, Math.max(1, Number(pageSize) || 20));
+
+    return this.reviewService.listReviewsBySeller(sellerId, d, p, ps);
   }
 }
 

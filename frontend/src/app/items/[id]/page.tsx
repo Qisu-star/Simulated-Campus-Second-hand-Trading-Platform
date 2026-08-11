@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
 import type { Item, ItemDetailResponse, ToggleFavoriteResponse } from "@/lib/types";
+import type { Review, ReviewListResponse, Order, OrderListResponse } from "@/lib/types";
+import { ReviewForm } from "./ReviewForm";
+import { ReviewList } from "./ReviewList";
 
 type PageState = "loading" | "error" | "notfound" | "success";
 
@@ -23,6 +26,15 @@ export default function ItemDetailPage({
   const [cartMessage, setCartMessage] = useState("");
   const [cartError, setCartError] = useState("");
   const [cartLoading, setCartLoading] = useState(false);
+
+  // Review state
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewTotal, setReviewTotal] = useState(0);
+  const [reviewTotalPages, setReviewTotalPages] = useState(1);
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [canReview, setCanReview] = useState(false);
+  const [eligibleOrderId, setEligibleOrderId] = useState<number | null>(null);
 
   // Buy-now modal
   const [showBuyModal, setShowBuyModal] = useState(false);
@@ -57,9 +69,75 @@ export default function ItemDetailPage({
     }
   }, [id]);
 
+  const fetchReviews = useCallback(async (pageNum: number) => {
+    setReviewLoading(true);
+    try {
+      const response = await api.get<ReviewListResponse>(
+        `/api/items/${id}/reviews?page=${pageNum}&pageSize=10`,
+      );
+      setReviews(response.data);
+      setReviewTotal(response.total);
+      setReviewTotalPages(response.totalPages);
+    } catch {
+      // ignore
+    } finally {
+      setReviewLoading(false);
+    }
+  }, [id]);
+
+  const checkCanReview = useCallback(async () => {
+    if (!isAuthenticated() || !item) {
+      setCanReview(false);
+      setEligibleOrderId(null);
+      return;
+    }
+
+    try {
+      const ordersResponse = await api.get<OrderListResponse>(
+        "/api/orders?page=1&pageSize=50",
+      );
+
+      // Find a received order that contains this item and hasn't been reviewed
+      for (const order of ordersResponse.data) {
+        if (order.status !== "received") continue;
+
+        const orderItem = order.items.find((i) => i.itemId === item.id);
+        if (!orderItem) continue;
+
+        // Check if already reviewed
+        const alreadyReviewed = reviews.some(
+          (r) => r.orderId === order.id && r.itemId === item.id,
+        );
+        if (alreadyReviewed) continue;
+
+        setCanReview(true);
+        setEligibleOrderId(order.id);
+        return;
+      }
+
+      setCanReview(false);
+      setEligibleOrderId(null);
+    } catch {
+      setCanReview(false);
+      setEligibleOrderId(null);
+    }
+  }, [item, reviews]);
+
   useEffect(() => {
     void fetchItem();
   }, [fetchItem]);
+
+  useEffect(() => {
+    if (pageState === "success") {
+      void fetchReviews(reviewPage);
+    }
+  }, [pageState, fetchReviews, reviewPage]);
+
+  useEffect(() => {
+    if (pageState === "success" && item) {
+      void checkCanReview();
+    }
+  }, [pageState, item, checkCanReview]);
 
   const handleToggleItemFavorite = useCallback(async () => {
     if (!isAuthenticated()) {
@@ -636,9 +714,41 @@ export default function ItemDetailPage({
         <h2 className="mb-6 text-xl font-bold text-slate-900">
           商品评价
         </h2>
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500">
-          <p className="text-sm">暂无评价</p>
-        </div>
+
+        {/* Review form for eligible users */}
+        {canReview && eligibleOrderId && (
+          <div className="mb-6">
+            <ReviewForm
+              itemId={item.id}
+              orderId={eligibleOrderId}
+              onSuccess={() => {
+                setCanReview(false);
+                void fetchReviews(1);
+              }}
+            />
+          </div>
+        )}
+
+        {/* Review list */}
+        {reviewLoading ? (
+          <div className="animate-pulse space-y-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-24 rounded-xl bg-slate-200"
+              />
+            ))}
+          </div>
+        ) : (
+          <ReviewList
+            page={reviewPage}
+            reviews={reviews}
+            total={reviewTotal}
+            totalPages={reviewTotalPages}
+            onPrevPage={() => setReviewPage((p) => Math.max(1, p - 1))}
+            onNextPage={() => setReviewPage((p) => Math.min(reviewTotalPages, p + 1))}
+          />
+        )}
       </section>
     </main>
   );
