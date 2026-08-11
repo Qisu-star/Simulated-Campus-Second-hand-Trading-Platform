@@ -3,12 +3,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { CategoryFilter } from "@/components/category-filter";
 import { ItemCard } from "@/components/item-card";
-import { SearchBar } from "@/components/search-bar";
 import { api } from "@/lib/api";
 import type { Category } from "@/lib/types";
 import type { Item, ItemListResponse } from "@/lib/types";
 
 type PageState = "loading" | "error" | "empty" | "success";
+
+function getSearchParamFromUrl(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+  const params = new URLSearchParams(window.location.search);
+  return params.get("q") ?? "";
+}
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
@@ -19,8 +26,18 @@ export default function Home() {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [pageState, setPageState] = useState<PageState>("loading");
   const [errorMessage, setErrorMessage] = useState("");
+  const [initialized, setInitialized] = useState(false);
 
   const pageSize = 20;
+
+  // Read the ?q= param from URL on initial mount
+  useEffect(() => {
+    const q = getSearchParamFromUrl();
+    if (q) {
+      setSearchKeyword(q);
+    }
+    setInitialized(true);
+  }, []);
 
   const buildSearchParams = useCallback(
     (currentPage: number, category: Category, keyword: string) => {
@@ -66,16 +83,13 @@ export default function Home() {
   );
 
   useEffect(() => {
-    void fetchItems(page, selectedCategory, searchKeyword);
-  }, [page, selectedCategory, searchKeyword, fetchItems]);
+    if (initialized) {
+      void fetchItems(page, selectedCategory, searchKeyword);
+    }
+  }, [page, selectedCategory, searchKeyword, fetchItems, initialized]);
 
   const handleCategoryChange = (category: Category) => {
     setSelectedCategory(category);
-    setPage(1);
-  };
-
-  const handleSearch = (keyword: string) => {
-    setSearchKeyword(keyword);
     setPage(1);
   };
 
@@ -102,13 +116,6 @@ export default function Home() {
           发现校园里的好物，买卖二手物品。
         </p>
       </header>
-
-      <section aria-label="商品搜索" className="mb-4">
-        <SearchBar
-          initialKeyword={searchKeyword}
-          onSearch={handleSearch}
-        />
-      </section>
 
       <section aria-label="分类筛选" className="mb-6">
         <CategoryFilter

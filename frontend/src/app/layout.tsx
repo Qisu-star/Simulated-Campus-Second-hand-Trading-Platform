@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
-  title: "Web 开发课程",
-  description: "一个可以逐步扩展的全栈 Web 课程项目",
+  title: "校园二手集市",
+  description: "发现校园里的好物，买卖二手物品。",
 };
 
 export default function RootLayout({
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body>
+        <Navbar />
+        <div className="pt-16">{children}</div>
+      </body>
     </html>
   );
 }
