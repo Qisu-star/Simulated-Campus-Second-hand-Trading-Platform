@@ -785,6 +785,136 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/account:
+    get:
+      operationId: getAccount
+      summary: 查看账户信息（需认证）
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 账户信息（余额、是否已设置支付密码）
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/AccountInfo"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/account/balance:
+    put:
+      operationId: setBalance
+      summary: 设置账户余额（演示用途，需认证）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetBalanceInput"
+      responses:
+        "200":
+          description: 余额更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      balance:
+                        type: number
+        "400":
+          description: 无效的余额值
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/account/password:
+    put:
+      operationId: setPaymentPassword
+      summary: 设置支付密码（6 位数字，需认证）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetPaymentPasswordInput"
+      responses:
+        "200":
+          description: 支付密码设置成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: 支付密码格式错误（非 6 位数字）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/account/verify-password:
+    post:
+      operationId: verifyPaymentPassword
+      summary: 验证支付密码（需认证）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyPaymentPasswordInput"
+      responses:
+        "200":
+          description: 支付密码验证通过
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: 支付密码错误
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     bearerAuth:
@@ -1088,3 +1218,38 @@ components:
           type: integer
         totalPages:
           type: integer
+    AccountInfo:
+      type: object
+      required: [balance, hasPaymentPassword]
+      properties:
+        balance:
+          type: number
+          description: 账户余额
+        hasPaymentPassword:
+          type: boolean
+          description: 是否已设置支付密码
+    SetBalanceInput:
+      type: object
+      additionalProperties: false
+      required: [balance]
+      properties:
+        balance:
+          type: number
+          description: 要设置的余额值
+    SetPaymentPasswordInput:
+      type: object
+      additionalProperties: false
+      required: [password]
+      properties:
+        password:
+          type: string
+          pattern: "^\\d{6}$"
+          description: 6 位数字支付密码
+    VerifyPaymentPasswordInput:
+      type: object
+      additionalProperties: false
+      required: [password]
+      properties:
+        password:
+          type: string
+          description: 支付密码

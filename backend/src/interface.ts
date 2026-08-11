@@ -111,3 +111,28 @@ export interface FavoriteSellerListResponse {
   total: number;
   totalPages: number;
 }
+
+export interface Account {
+  id: number;
+  userId: number;
+  balance: number;
+  paymentPassword: string | null;
+  createdAt: string;
+}
+
+export interface AccountInfo {
+  balance: number;
+  hasPaymentPassword: boolean;
+}
+
+export interface SetBalanceInput {
+  balance: number;
+}
+
+export interface SetPaymentPasswordInput {
+  password: string;
+}
+
+export interface VerifyPaymentPasswordInput {
+  password: string;
+}

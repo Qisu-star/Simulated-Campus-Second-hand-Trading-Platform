@@ -73,3 +73,8 @@ export interface ToggleFavoriteResponse {
     action: "favorited" | "unfavorited";
   };
 }
+
+export interface AccountInfo {
+  balance: number;
+  hasPaymentPassword: boolean;
+}
