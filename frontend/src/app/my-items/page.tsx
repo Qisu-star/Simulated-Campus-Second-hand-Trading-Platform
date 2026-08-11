@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -86,12 +87,12 @@ export default function MyItemsPage() {
           </h1>
           <p className="mt-1 text-slate-600">共 {total} 件商品</p>
         </div>
-        <a
+        <Link
           className="rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
           href="/items/new"
         >
           发布新商品
-        </a>
+        </Link>
       </header>
 
       <section aria-label="商品列表" className="flex-1">
@@ -135,14 +136,14 @@ export default function MyItemsPage() {
               还没有发布商品
             </p>
             <p className="mt-2 text-sm text-slate-600">
-              点击"发布新商品"按钮开始出售你的闲置物品。
+              点击&quot;发布新商品&quot;按钮开始出售你的闲置物品。
             </p>
-            <a
+            <Link
               className="mt-6 inline-block rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               href="/items/new"
             >
               发布新商品
-            </a>
+            </Link>
           </div>
         )}
 
@@ -261,12 +262,12 @@ export default function MyItemsPage() {
       </section>
 
       <footer className="mt-auto pt-16 text-sm text-slate-500">
-        <a
+        <Link
           className="text-slate-700 underline-offset-2 hover:underline"
           href="/"
         >
           返回首页
-        </a>
+        </Link>
       </footer>
     </main>
   );

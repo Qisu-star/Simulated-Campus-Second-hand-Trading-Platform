@@ -126,7 +126,8 @@ export default function Home() {
         <section aria-label="搜索结果信息" className="mb-4">
           <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3">
             <p className="text-sm text-blue-900">
-              搜索结果：<span className="font-semibold">"{searchKeyword}"</span>
+              搜索结果：
+              <span className="font-semibold">&quot;{searchKeyword}&quot;</span>
               {total > 0 && (
                 <span className="ml-1 text-blue-600">
                   （共 {total} 件商品）

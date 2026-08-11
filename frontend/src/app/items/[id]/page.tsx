@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
@@ -345,12 +346,12 @@ export default function ItemDetailPage({
           <p className="mt-2 text-sm text-slate-600">
             该商品不存在或已下架，请返回首页查看其他商品。
           </p>
-          <a
+          <Link
             className="mt-6 inline-block rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
             href="/"
           >
             返回首页
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -373,7 +374,7 @@ export default function ItemDetailPage({
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10 sm:px-10 sm:py-16">
       {/* Back link */}
-      <a
+      <Link
         className="mb-8 inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900"
         href="/"
       >
@@ -391,7 +392,7 @@ export default function ItemDetailPage({
           />
         </svg>
         返回首页
-      </a>
+      </Link>
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
         {/* Image section */}

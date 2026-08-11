@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ItemForm, type ItemFormData } from "@/components/item-form";
@@ -20,12 +21,6 @@ export default function EditItemPage({
   const [pageState, setPageState] = useState<PageState>("loading");
   const [errorMessage, setErrorMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  // Redirect to login if not authenticated
-  if (typeof window !== "undefined" && !isAuthenticated()) {
-    router.push("/auth/login");
-    return null;
-  }
 
   const fetchItem = useCallback(async () => {
     setPageState("loading");
@@ -55,6 +50,12 @@ export default function EditItemPage({
   useEffect(() => {
     void fetchItem();
   }, [fetchItem]);
+
+  // Redirect to login if not authenticated
+  if (typeof window !== "undefined" && !isAuthenticated()) {
+    router.push("/auth/login");
+    return null;
+  }
 
   const handleSubmit = async (data: ItemFormData) => {
     setSubmitting(true);
@@ -127,12 +128,12 @@ export default function EditItemPage({
             <p className="mt-2 text-sm text-slate-600">
               该商品不存在或已下架。
             </p>
-            <a
+            <Link
               className="mt-6 inline-block rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               href="/my-items"
             >
               返回我的商品
-            </a>
+            </Link>
           </div>
         )}
 

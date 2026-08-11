@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { use, useCallback, useEffect, useState } from "react";
 import { CategoryFilter } from "@/components/category-filter";
 import { ItemCard } from "@/components/item-card";
@@ -198,12 +199,12 @@ export default function SellerPage({
           <p className="mt-2 text-sm text-slate-600">
             该商家不存在，请返回首页查看其他商品。
           </p>
-          <a
+          <Link
             className="mt-6 inline-block rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
             href="/"
           >
             返回首页
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -235,7 +236,7 @@ export default function SellerPage({
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10 sm:px-10 sm:py-16">
       {/* Back link */}
-      <a
+      <Link
         className="mb-8 inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900"
         href="/"
       >
@@ -253,7 +254,7 @@ export default function SellerPage({
           />
         </svg>
         返回首页
-      </a>
+      </Link>
 
       {/* Seller info header */}
       <section aria-label="商家信息" className="mb-8">

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { clearAuth, getStoredUser, isAuthenticated } from "@/lib/auth";
 
@@ -73,12 +74,12 @@ export function Navbar() {
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
         {/* Left: Site name */}
-        <a
+        <Link
           className="shrink-0 text-xl font-bold tracking-tight text-slate-950 transition hover:text-blue-700"
           href="/"
         >
           校园二手集市
-        </a>
+        </Link>
 
         {/* Center: Search (hidden on mobile) */}
         <form

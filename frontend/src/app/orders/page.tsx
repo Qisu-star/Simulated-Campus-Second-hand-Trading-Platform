@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
@@ -188,12 +189,12 @@ function OrdersPageContent() {
               : "商品被购买后，订单会显示在这里"}
           </p>
           {activeTab === "buy" && (
-            <a
+            <Link
               className="mt-6 inline-block rounded-xl bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800"
               href="/"
             >
               去逛逛
-            </a>
+            </Link>
           )}
         </div>
       )}

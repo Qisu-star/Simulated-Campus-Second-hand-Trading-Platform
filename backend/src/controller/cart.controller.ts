@@ -13,7 +13,6 @@ import {
 import { Context } from "@midwayjs/koa";
 import { CartService } from "../service/cart.service";
 import { verifyToken } from "../utils/auth";
-import type { AddToCartInput, BuyNowInput, CheckoutInput } from "../interface";
 
 function extractToken(authorization: string | undefined): string | null {
   if (!authorization || typeof authorization !== "string") {

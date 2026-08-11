@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { getStoredUser, isAuthenticated } from "@/lib/auth";
@@ -29,52 +29,49 @@ export default function ProfilePage() {
     }
   }, [router]);
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setSuccessMessage("");
-      setErrorMessage("");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSuccessMessage("");
+    setErrorMessage("");
 
-      // Validation
-      if (!currentPassword) {
-        setErrorMessage("请输入当前密码");
-        return;
-      }
-      if (!newPassword) {
-        setErrorMessage("请输入新密码");
-        return;
-      }
-      if (newPassword.length < 6) {
-        setErrorMessage("新密码长度至少为 6 位");
-        return;
-      }
-      if (newPassword !== confirmPassword) {
-        setErrorMessage("两次输入的密码不一致");
-        return;
-      }
+    // Validation
+    if (!currentPassword) {
+      setErrorMessage("请输入当前密码");
+      return;
+    }
+    if (!newPassword) {
+      setErrorMessage("请输入新密码");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setErrorMessage("新密码长度至少为 6 位");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setErrorMessage("两次输入的密码不一致");
+      return;
+    }
 
-      setSubmitting(true);
-      try {
-        await api.put("/api/auth/password", {
-          currentPassword,
-          newPassword,
-        });
-        setSuccessMessage("密码修改成功");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } catch (reason) {
-        if (reason instanceof ApiError) {
-          setErrorMessage(reason.message);
-        } else {
-          setErrorMessage("密码修改失败，请稍后重试");
-        }
-      } finally {
-        setSubmitting(false);
+    setSubmitting(true);
+    try {
+      await api.put("/api/auth/password", {
+        currentPassword,
+        newPassword,
+      });
+      setSuccessMessage("密码修改成功");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (reason) {
+      if (reason instanceof ApiError) {
+        setErrorMessage(reason.message);
+      } else {
+        setErrorMessage("密码修改失败，请稍后重试");
       }
-    },
-    [currentPassword, newPassword, confirmPassword],
-  );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (pageState === "loading") {
     return (

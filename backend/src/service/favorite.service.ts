@@ -2,13 +2,7 @@ import { Config, Destroy, Init, Provide } from "@midwayjs/core";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type {
-  FavoriteItemListResponse,
-  FavoriteItemWithInfo,
-  FavoriteSellerListResponse,
-  FavoriteSellerWithInfo,
-  ToggleFavoriteResponse,
-} from "../interface";
+import type { ToggleFavoriteResponse } from "../interface";
 
 type FavoriteRow = {
   id: number;

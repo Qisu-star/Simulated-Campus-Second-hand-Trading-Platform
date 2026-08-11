@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
@@ -110,13 +111,13 @@ export default function CartPage() {
   );
 
   const handleOpenPayment = useCallback(() => {
-    if (selectedItems.length === 0) {
+    if (cartItems.filter((item) => item.selected).length === 0) {
       return;
     }
     setPaymentPassword("");
     setPaymentError("");
     setShowPaymentModal(true);
-  }, [selectedItems.length]);
+  }, [cartItems]);
 
   const handlePaymentSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -197,12 +198,12 @@ export default function CartPage() {
           </svg>
           <p className="text-lg font-semibold text-slate-900">购物车是空的</p>
           <p className="mt-2 text-sm">快去逛逛，发现心仪的商品吧</p>
-          <a
+          <Link
             className="mt-6 inline-block rounded-xl bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800"
             href="/"
           >
             去逛逛
-          </a>
+          </Link>
         </div>
       </main>
     );

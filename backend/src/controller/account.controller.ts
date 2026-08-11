@@ -10,7 +10,6 @@ import {
 } from "@midwayjs/core";
 import { AccountService } from "../service/account.service";
 import { verifyToken } from "../utils/auth";
-import type { AccountInfo } from "../interface";
 
 function extractToken(authorization: string | undefined): string | null {
   if (!authorization || typeof authorization !== "string") {

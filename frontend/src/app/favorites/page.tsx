@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
@@ -153,12 +154,12 @@ export default function FavoritesPage() {
                 暂无收藏商品
               </p>
               <p className="mt-2 text-sm">去浏览商品页面，收藏感兴趣的商品吧</p>
-              <a
+              <Link
                 className="mt-6 inline-block rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
                 href="/"
               >
                 浏览商品
-              </a>
+              </Link>
             </div>
           ) : (
             <>
@@ -206,12 +207,12 @@ export default function FavoritesPage() {
                 暂无收藏商家
               </p>
               <p className="mt-2 text-sm">浏览商品时，可以收藏感兴趣的商家</p>
-              <a
+              <Link
                 className="mt-6 inline-block rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
                 href="/"
               >
                 浏览商品
-              </a>
+              </Link>
             </div>
           ) : (
             <>

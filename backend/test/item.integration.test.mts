@@ -13,8 +13,6 @@ process.env.NODE_ENV = "unittest";
 const backendDirectory = fileURLToPath(new URL("..", import.meta.url));
 const compiledSourceDirectory = join(backendDirectory, "dist");
 
-type TestApplication = Awaited<ReturnType<typeof createApp>>;
-
 type SeedItem = {
   id: number;
   title: string;

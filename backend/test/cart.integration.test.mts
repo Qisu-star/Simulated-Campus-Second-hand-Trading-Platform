@@ -316,8 +316,6 @@ describe("cart API", { concurrency: false }, () => {
           "结算测试",
           "password123",
         );
-        const userId = 1; // admin user from seed
-
         // Set payment password and balance
         await request
           .put("/api/account/password")

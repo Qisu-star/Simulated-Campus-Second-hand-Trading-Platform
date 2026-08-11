@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -267,12 +268,12 @@ export default function AdminReviewsPage() {
       </section>
 
       <footer className="mt-auto pt-16 text-sm text-slate-500">
-        <a
+        <Link
           className="text-slate-700 underline-offset-2 hover:underline"
           href="/"
         >
           返回首页
-        </a>
+        </Link>
       </footer>
     </main>
   );
