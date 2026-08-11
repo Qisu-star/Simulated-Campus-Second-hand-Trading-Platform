@@ -1,20 +1,15 @@
 import { Body, Controller, Get, Headers, httpError, Inject, Param, Patch, Post, Put, Query } from "@midwayjs/core";
 import { Context } from "@midwayjs/koa";
 import { AuthService } from "../service/auth.service";
-import { CourseService } from "../service/course.service";
 import { FavoriteService } from "../service/favorite.service";
 import { ItemService } from "../service/item.service";
 import { ReviewService } from "../service/review.service";
-import { parseCourseInput } from "../utils/course-input";
 import { verifyToken } from "../utils/auth";
 
 @Controller("/api")
 export class ApiController {
   @Inject()
   authService: AuthService;
-
-  @Inject()
-  courseService: CourseService;
 
   @Inject()
   itemService: ItemService;
@@ -27,31 +22,6 @@ export class ApiController {
 
   @Inject()
   ctx: Context;
-
-  @Get("/health")
-  async health() {
-    return {
-      status: "ok" as const,
-      service: "course-demo-api",
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  @Get("/courses")
-  async listCourses() {
-    return { data: this.courseService.list() };
-  }
-
-  @Post("/courses")
-  async createCourse(@Body() body: unknown) {
-    try {
-      const input = parseCourseInput(body);
-      return { data: this.courseService.create(input) };
-    } catch (reason) {
-      const message = reason instanceof Error ? reason.message : "课程数据无效";
-      throw new httpError.BadRequestError(message);
-    }
-  }
 
   @Get("/items")
   async listItems(

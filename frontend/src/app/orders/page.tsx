@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
@@ -8,7 +8,7 @@ import type { Order, OrderListResponse } from "@/lib/types";
 
 type PageState = "loading" | "ready" | "error" | "empty";
 
-export default function OrdersPage() {
+function OrdersPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") === "sell" ? "sell" : "buy";
@@ -298,5 +298,17 @@ export default function OrdersPage() {
         </>
       )}
     </main>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={
+      <main className="mx-auto flex min-h-screen max-w-4xl items-center justify-center px-6 py-10">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
+      </main>
+    }>
+      <OrdersPageContent />
+    </Suspense>
   );
 }
