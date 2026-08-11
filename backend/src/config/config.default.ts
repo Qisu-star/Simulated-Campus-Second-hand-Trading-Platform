@@ -8,4 +8,7 @@ export default {
   courseDatabase: {
     path: process.env.DATABASE_PATH ?? "./data/course-demo.sqlite",
   },
+  authDatabase: {
+    path: process.env.AUTH_DATABASE_PATH ?? "./data/auth.sqlite",
+  },
 } as MidwayConfig;
