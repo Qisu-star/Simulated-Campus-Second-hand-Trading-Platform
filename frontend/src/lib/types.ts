@@ -136,3 +136,15 @@ export interface ReviewListResponse {
   total: number;
   totalPages: number;
 }
+
+export interface AdminReviewItem {
+  id: number;
+  title: string;
+  price: number;
+  quantity: number;
+  description: string;
+  coverImage: string;
+  category: string;
+  sellerName: string;
+  createdAt: string;
+}

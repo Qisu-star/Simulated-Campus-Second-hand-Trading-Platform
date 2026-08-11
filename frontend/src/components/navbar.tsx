@@ -294,7 +294,7 @@ export function Navbar() {
                   {user.role === "admin" && (
                     <a
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50"
-                      href="#"
+                      href="/admin/reviews"
                       onClick={() => setDropdownOpen(false)}
                     >
                       <svg

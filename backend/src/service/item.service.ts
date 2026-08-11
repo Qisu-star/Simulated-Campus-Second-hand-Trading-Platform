@@ -531,6 +531,74 @@ export class ItemService {
     };
   }
 
+  listPendingItems(page: number, pageSize: number): ItemListResponse {
+    if (!this.database) {
+      return { data: [], total: 0, totalPages: 1 };
+    }
+
+    const conditions = ["status = 'pending'"];
+    const params: (string | number)[] = [];
+
+    const countRow = this.database
+      .prepare(`SELECT COUNT(*) AS total FROM items WHERE ${conditions.join(" AND ")}`)
+      .get(...params) as { total: number };
+
+    const total = countRow.total;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const offset = (page - 1) * pageSize;
+
+    const rows = this.database
+      .prepare(
+        `SELECT id, title, price, quantity, description, images, cover_image, category, seller_id, seller_name, status, created_at, quantity_updated_at
+         FROM items WHERE ${conditions.join(" AND ")}
+         ORDER BY created_at DESC
+         LIMIT ? OFFSET ?`,
+      )
+      .all(...params, pageSize, offset) as ItemRow[];
+
+    return {
+      data: rows.map(mapItem),
+      total,
+      totalPages,
+    };
+  }
+
+  approveItem(itemId: number): void {
+    if (!this.database) {
+      throw new Error("数据库未初始化");
+    }
+
+    const row = this.database
+      .prepare("SELECT id, status FROM items WHERE id = ?")
+      .get(itemId) as { id: number; status: string } | undefined;
+
+    if (!row) {
+      throw new Error("商品不存在");
+    }
+
+    this.database
+      .prepare("UPDATE items SET status = 'active' WHERE id = ?")
+      .run(itemId);
+  }
+
+  rejectItem(itemId: number): void {
+    if (!this.database) {
+      throw new Error("数据库未初始化");
+    }
+
+    const row = this.database
+      .prepare("SELECT id, status FROM items WHERE id = ?")
+      .get(itemId) as { id: number; status: string } | undefined;
+
+    if (!row) {
+      throw new Error("商品不存在");
+    }
+
+    this.database
+      .prepare("UPDATE items SET status = 'delisted' WHERE id = ?")
+      .run(itemId);
+  }
+
   private autoDelistExpiredItems(): void {
     if (!this.database) {
       return;

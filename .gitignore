@@ -34,6 +34,7 @@
 # Runtime database files; keep the empty directory marker
 /backend/data/*
 !/backend/data/.gitkeep
+/data/*
 
 # Root-level and shared build caches
 /dist/
