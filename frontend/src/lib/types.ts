@@ -78,3 +78,43 @@ export interface AccountInfo {
   balance: number;
   hasPaymentPassword: boolean;
 }
+
+export interface CartItem {
+  id: number;
+  userId: number;
+  itemId: number;
+  quantity: number;
+  selected: boolean;
+  createdAt: string;
+  title: string;
+  price: number;
+  coverImage: string;
+  stock: number;
+  status: string;
+}
+
+export interface OrderItem {
+  id: number;
+  orderId: number;
+  itemId: number;
+  sellerId: number;
+  title: string;
+  price: number;
+  quantity: number;
+  coverImage: string;
+}
+
+export interface Order {
+  id: number;
+  userId: number;
+  totalPrice: number;
+  status: 'pending_receipt' | 'received';
+  createdAt: string;
+  items: OrderItem[];
+}
+
+export interface OrderListResponse {
+  data: Order[];
+  total: number;
+  totalPages: number;
+}

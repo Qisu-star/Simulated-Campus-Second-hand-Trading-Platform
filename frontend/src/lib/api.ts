@@ -63,4 +63,7 @@ export const api = {
 
   patch: <T = unknown>(path: string, body?: unknown) =>
     apiRequest<T>(path, { method: "PATCH", body }),
+
+  del: <T = unknown>(path: string) =>
+    apiRequest<T>(path, { method: "DELETE" }),
 };

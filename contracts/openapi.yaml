@@ -915,6 +915,338 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/cart:
+    post:
+      operationId: addToCart
+      summary: 加入购物车（需认证）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddToCartInput"
+      responses:
+        "201":
+          description: 已加入购物车
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: 商品已下架或售罄
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      operationId: listCart
+      summary: 查看购物车（需认证）
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 购物车商品列表
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CartItem"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/cart/{id}:
+    delete:
+      operationId: removeFromCart
+      summary: 删除购物车商品（需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 已从购物车移除
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: 购物车项不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/cart/{id}/select:
+    patch:
+      operationId: toggleCartSelect
+      summary: 切换购物车商品勾选状态（需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [selected]
+              properties:
+                selected:
+                  type: boolean
+      responses:
+        "200":
+          description: 勾选状态已更新
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: 购物车项不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/cart/checkout:
+    post:
+      operationId: checkout
+      summary: 结算勾选商品（需认证）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutInput"
+      responses:
+        "200":
+          description: 结算成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      orderId:
+                        type: integer
+        "400":
+          description: 库存不足或支付密码错误
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "402":
+          description: 余额不足
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/cart/buy-now:
+    post:
+      operationId: buyNow
+      summary: 立即购买（需认证）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BuyNowInput"
+      responses:
+        "200":
+          description: 购买成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      orderId:
+                        type: integer
+        "400":
+          description: 商品已售罄或支付密码错误
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "402":
+          description: 余额不足
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/orders:
+    get:
+      operationId: listOrders
+      summary: 查看我的购买订单（需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: 订单列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderListResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/orders/sales:
+    get:
+      operationId: listSales
+      summary: 查看售出订单（需认证）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: 售出订单列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderListResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/orders/{id}/receive:
+    post:
+      operationId: confirmReceive
+      summary: 确认签收（需认证，仅买家可操作）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 已确认签收
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "400":
+          description: 订单状态错误
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: 无权操作此订单
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     bearerAuth:
@@ -1253,3 +1585,114 @@ components:
         password:
           type: string
           description: 支付密码
+    AddToCartInput:
+      type: object
+      additionalProperties: false
+      required: [itemId, quantity]
+      properties:
+        itemId:
+          type: integer
+          description: 商品 ID
+        quantity:
+          type: integer
+          minimum: 1
+          description: 数量
+    CartItem:
+      type: object
+      required: [id, userId, itemId, quantity, selected, createdAt, title, price, coverImage, stock, status]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        itemId:
+          type: integer
+        quantity:
+          type: integer
+        selected:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        title:
+          type: string
+        price:
+          type: number
+        coverImage:
+          type: string
+        stock:
+          type: integer
+        status:
+          type: string
+    CheckoutInput:
+      type: object
+      additionalProperties: false
+      required: [paymentPassword]
+      properties:
+        paymentPassword:
+          type: string
+          description: 支付密码
+    BuyNowInput:
+      type: object
+      additionalProperties: false
+      required: [itemId, quantity, paymentPassword]
+      properties:
+        itemId:
+          type: integer
+        quantity:
+          type: integer
+          minimum: 1
+        paymentPassword:
+          type: string
+    OrderItem:
+      type: object
+      required: [id, orderId, itemId, sellerId, title, price, quantity, coverImage]
+      properties:
+        id:
+          type: integer
+        orderId:
+          type: integer
+        itemId:
+          type: integer
+        sellerId:
+          type: integer
+        title:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: integer
+        coverImage:
+          type: string
+    Order:
+      type: object
+      required: [id, userId, totalPrice, status, createdAt, items]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        totalPrice:
+          type: number
+        status:
+          type: string
+          enum: [pending_receipt, received]
+        createdAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+    OrderListResponse:
+      type: object
+      required: [data, total, totalPages]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        total:
+          type: integer
+        totalPages:
+          type: integer

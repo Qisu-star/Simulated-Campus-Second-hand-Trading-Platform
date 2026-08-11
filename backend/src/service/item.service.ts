@@ -439,6 +439,18 @@ export class ItemService {
       .run(status, itemId);
   }
 
+  deductStock(itemId: number, quantity: number): boolean {
+    if (!this.database) {
+      return false;
+    }
+
+    const result = this.database
+      .prepare("UPDATE items SET quantity = quantity - ? WHERE id = ? AND status = 'active' AND quantity >= ?")
+      .run(quantity, itemId, quantity);
+
+    return result.changes > 0;
+  }
+
   listSellerItems(
     sellerId: number,
     category?: string,

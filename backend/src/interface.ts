@@ -136,3 +136,61 @@ export interface SetPaymentPasswordInput {
 export interface VerifyPaymentPasswordInput {
   password: string;
 }
+
+// Cart types
+export interface AddToCartInput {
+  itemId: number;
+  quantity: number;
+}
+
+export interface CartItem {
+  id: number;
+  userId: number;
+  itemId: number;
+  quantity: number;
+  selected: boolean;
+  createdAt: string;
+  // 商品信息
+  title: string;
+  price: number;
+  coverImage: string;
+  stock: number;
+  status: string;
+}
+
+export interface CheckoutInput {
+  paymentPassword: string;
+}
+
+export interface BuyNowInput {
+  itemId: number;
+  quantity: number;
+  paymentPassword: string;
+}
+
+// Order types
+export interface OrderItem {
+  id: number;
+  orderId: number;
+  itemId: number;
+  sellerId: number;
+  title: string;
+  price: number;
+  quantity: number;
+  coverImage: string;
+}
+
+export interface Order {
+  id: number;
+  userId: number;
+  totalPrice: number;
+  status: 'pending_receipt' | 'received';
+  createdAt: string;
+  items: OrderItem[];
+}
+
+export interface OrderListResponse {
+  data: Order[];
+  total: number;
+  totalPages: number;
+}

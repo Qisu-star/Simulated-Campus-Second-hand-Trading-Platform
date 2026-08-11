@@ -20,4 +20,7 @@ export default {
   accountDatabase: {
     path: process.env.ACCOUNT_DATABASE_PATH ?? "./data/account.sqlite",
   },
+  tradeDatabase: {
+    path: process.env.TRADE_DATABASE_PATH ?? "./data/trade.sqlite",
+  },
 } as MidwayConfig;

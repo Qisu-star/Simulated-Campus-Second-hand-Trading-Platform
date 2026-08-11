@@ -1,7 +1,8 @@
 "use client";
 
 import { use, useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { api, ApiError } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
 import type { Item, ItemDetailResponse, ToggleFavoriteResponse } from "@/lib/types";
 
@@ -19,6 +20,18 @@ export default function ItemDetailPage({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [itemFavLoading, setItemFavLoading] = useState(false);
   const [sellerFavLoading, setSellerFavLoading] = useState(false);
+  const [cartMessage, setCartMessage] = useState("");
+  const [cartError, setCartError] = useState("");
+  const [cartLoading, setCartLoading] = useState(false);
+
+  // Buy-now modal
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const [buyQuantity, setBuyQuantity] = useState(1);
+  const [paymentPassword, setPaymentPassword] = useState("");
+  const [buySubmitting, setBuySubmitting] = useState(false);
+  const [buyError, setBuyError] = useState("");
+
+  const router = useRouter();
 
   const fetchItem = useCallback(async () => {
     setPageState("loading");
@@ -101,6 +114,77 @@ export default function ItemDetailPage({
       setSellerFavLoading(false);
     }
   }, [item]);
+
+  const handleAddToCart = useCallback(async () => {
+    if (!isAuthenticated()) {
+      window.location.href = "/auth/login";
+      return;
+    }
+
+    if (!item) return;
+
+    setCartMessage("");
+    setCartError("");
+    setCartLoading(true);
+
+    try {
+      await api.post("/api/cart", { itemId: item.id, quantity: 1 });
+      setCartMessage("已加入购物车");
+      setTimeout(() => setCartMessage(""), 3000);
+    } catch (reason) {
+      if (reason instanceof ApiError) {
+        setCartError(reason.message);
+      } else {
+        setCartError("加入购物车失败");
+      }
+      setTimeout(() => setCartError(""), 3000);
+    } finally {
+      setCartLoading(false);
+    }
+  }, [item]);
+
+  const handleOpenBuyModal = useCallback(() => {
+    if (!isAuthenticated()) {
+      window.location.href = "/auth/login";
+      return;
+    }
+
+    if (!item) return;
+
+    setBuyQuantity(1);
+    setPaymentPassword("");
+    setBuyError("");
+    setShowBuyModal(true);
+  }, [item]);
+
+  const handleBuySubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!item) return;
+
+      setBuyError("");
+      setBuySubmitting(true);
+
+      try {
+        await api.post("/api/cart/buy-now", {
+          itemId: item.id,
+          quantity: buyQuantity,
+          paymentPassword,
+        });
+        setShowBuyModal(false);
+        router.push("/orders");
+      } catch (reason) {
+        if (reason instanceof ApiError) {
+          setBuyError(reason.message);
+        } else {
+          setBuyError("购买失败，请稍后重试");
+        }
+      } finally {
+        setBuySubmitting(false);
+      }
+    },
+    [item, buyQuantity, paymentPassword, router],
+  );
 
   // Loading skeleton
   if (pageState === "loading") {
@@ -422,9 +506,7 @@ export default function ItemDetailPage({
             ) : (
               <button
                 className="w-full rounded-xl bg-slate-900 py-3 text-base font-semibold text-white transition hover:bg-slate-800"
-                onClick={() => {
-                  alert("请先登录后购买");
-                }}
+                onClick={() => void handleOpenBuyModal()}
                 type="button"
               >
                 立即购买
@@ -432,16 +514,119 @@ export default function ItemDetailPage({
             )}
             <button
               className="w-full rounded-xl border border-slate-300 bg-white py-3 text-base font-semibold text-slate-700 transition hover:bg-slate-50"
-              onClick={() => {
-                alert("请先登录后加入购物车");
-              }}
+              disabled={cartLoading}
+              onClick={() => void handleAddToCart()}
               type="button"
             >
-              加入购物车
+              {cartLoading ? "加入中..." : "加入购物车"}
             </button>
+            {cartMessage && (
+              <p className="text-center text-sm font-semibold text-emerald-600">{cartMessage}</p>
+            )}
+            {cartError && (
+              <p className="text-center text-sm font-semibold text-rose-600">{cartError}</p>
+            )}
           </div>
         </section>
       </div>
+
+      {/* Buy-now modal */}
+      {showBuyModal && item && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+            <h2 className="mb-2 text-lg font-semibold text-slate-900">
+              确认购买
+            </h2>
+            <p className="mb-2 text-sm text-slate-500">
+              {item.title} — ¥{item.price.toFixed(2)}
+            </p>
+
+            {buyError && (
+              <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-800">
+                {buyError}
+              </div>
+            )}
+
+            <form onSubmit={handleBuySubmit}>
+              <div className="mb-4">
+                <label
+                  className="mb-1.5 block text-sm font-semibold text-slate-700"
+                  htmlFor="buyQuantity"
+                >
+                  购买数量
+                </label>
+                <div className="flex items-center gap-3">
+                  <button
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    disabled={buyQuantity <= 1}
+                    onClick={() => setBuyQuantity((q) => Math.max(1, q - 1))}
+                    type="button"
+                  >
+                    -
+                  </button>
+                  <span className="min-w-[3rem] text-center text-lg font-semibold text-slate-900">
+                    {buyQuantity}
+                  </span>
+                  <button
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    disabled={buyQuantity >= item.quantity}
+                    onClick={() => setBuyQuantity((q) => Math.min(item.quantity, q + 1))}
+                    type="button"
+                  >
+                    +
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-slate-400">
+                  库存 {item.quantity} 件
+                </p>
+              </div>
+
+              <div className="mb-4">
+                <label
+                  className="mb-1.5 block text-sm font-semibold text-slate-700"
+                  htmlFor="paymentPassword"
+                >
+                  支付密码
+                </label>
+                <input
+                  id="paymentPassword"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  placeholder="请输入 6 位数字密码"
+                  type="password"
+                  maxLength={6}
+                  inputMode="numeric"
+                  value={paymentPassword}
+                  onChange={(e) => setPaymentPassword(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-4 text-right">
+                <span className="text-sm text-slate-600">合计：</span>
+                <span className="text-xl font-bold text-rose-600">
+                  ¥{(item.price * buyQuantity).toFixed(2)}
+                </span>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  onClick={() => setShowBuyModal(false)}
+                  type="button"
+                >
+                  取消
+                </button>
+                <button
+                  className="flex-1 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={buySubmitting || paymentPassword.length === 0}
+                  type="submit"
+                >
+                  {buySubmitting ? "支付中..." : "确认支付"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Reviews section */}
       <section
