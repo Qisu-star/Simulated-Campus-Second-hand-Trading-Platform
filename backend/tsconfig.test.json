@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "exclude": ["node_modules", "dist"],
+  "include": ["test/**/*.mts"]
+}
