@@ -35,3 +35,36 @@ export interface UpdatePasswordInput {
 export type TokenPayload = {
   userId: number;
 };
+
+export interface Item {
+  id: number;
+  title: string;
+  price: number;
+  quantity: number;
+  description: string;
+  images: string[];
+  coverImage: string;
+  category: string;
+  sellerId: number;
+  sellerName: string;
+  status: "pending" | "active" | "delisted";
+  createdAt: string;
+  quantityUpdatedAt: string | null;
+}
+
+export interface CreateItemInput {
+  title: string;
+  price: number;
+  quantity: number;
+  description: string;
+  category: string;
+  sellerId: number;
+  images: string[];
+  coverImage: string;
+}
+
+export interface ItemListResponse {
+  data: Item[];
+  total: number;
+  totalPages: number;
+}

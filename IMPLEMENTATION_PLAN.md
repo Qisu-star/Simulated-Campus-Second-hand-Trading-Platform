@@ -143,6 +143,7 @@ Phase 6 ─ 011 + 013 ────────────────── 收
 **依赖：** 无（基础模块）
 
 **Files:**
+
 - Create: `backend/src/controller/auth.controller.ts`
 - Create: `backend/src/service/auth.service.ts`
 - Create: `backend/src/utils/auth.ts`
@@ -155,6 +156,7 @@ Phase 6 ─ 011 + 013 ────────────────── 收
 - Modify: `contracts/openapi.yaml`
 
 **Interfaces:**
+
 - Produces: `User { id, username, role, createdAt }`, `AuthToken`, `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `PUT /api/auth/password`
 
 - [ ] **Step 1: 定义 User 接口和数据库表**
@@ -256,6 +258,7 @@ export class AuthController {
 **依赖：** Phase 1
 
 **Files:**
+
 - Create: `backend/src/service/item.service.ts`
 - Create: `backend/src/controller/api.controller.ts`（扩展）
 - Create: `frontend/src/app/page.tsx`（重写浏览页）
@@ -268,6 +271,7 @@ export class AuthController {
 - Modify: `contracts/openapi.yaml`
 
 **Interfaces:**
+
 - Produces: `Item { id, title, price, quantity, description, images, category, seller, status, createdAt }`, `GET /api/items`, `GET /api/items/{id}`, `GET /api/items/search`, `GET /api/categories`
 
 #### Task 2.1: 商品数据模型 + 浏览接口（001）
@@ -282,7 +286,7 @@ export interface Item {
   price: number;
   quantity: number;
   description: string;
-  images: string[];  // JSON array
+  images: string[]; // JSON array
   coverImage: string;
   category: string;
   sellerId: number;
@@ -332,6 +336,7 @@ export interface Item {
 **依赖：** Phase 1, Phase 2
 
 **Files:**
+
 - Modify: `backend/src/service/item.service.ts`（扩展：创建、编辑、下架、自动下架）
 - Modify: `backend/src/controller/api.controller.ts`（扩展）
 - Create: `frontend/src/app/my-items/page.tsx`
@@ -370,6 +375,7 @@ export interface Item {
 **依赖：** Phase 1
 
 **Files:**
+
 - Create: `frontend/src/components/navbar.tsx`
 - Create: `frontend/src/app/layout.tsx`（重写）
 - Create: `frontend/src/app/profile/page.tsx`
@@ -401,6 +407,7 @@ export interface Item {
 **依赖：** Phase 1, Phase 2, Phase 4
 
 **Files:**
+
 - Create: `backend/src/service/favorite.service.ts`
 - Create: `backend/src/controller/favorite.controller.ts`
 - Create: `backend/src/service/cart.service.ts`
@@ -481,6 +488,7 @@ async checkout(userId, cartItemIds, paymentPassword) {
 **依赖：** Phase 2, Phase 3, Phase 5
 
 **Files:**
+
 - Create: `backend/src/service/review.service.ts`
 - Create: `backend/src/controller/review.controller.ts`
 - Create: `backend/src/service/admin.service.ts`
@@ -615,13 +623,15 @@ CREATE TABLE accounts (
 this.database.exec("BEGIN IMMEDIATE");
 try {
   // 1. 检查并扣减库存（在同一事务中）
-  const item = this.database.prepare(
-    "SELECT quantity FROM items WHERE id = ? FOR UPDATE"
-  ).get(itemId);
+  const item = this.database
+    .prepare("SELECT quantity FROM items WHERE id = ? FOR UPDATE")
+    .get(itemId);
   if (item.quantity < requestedQty) throw new Error("库存不足");
-  this.database.prepare(
-    "UPDATE items SET quantity = ?, quantity_updated_at = ? WHERE id = ?"
-  ).run(item.quantity - requestedQty, now, itemId);
+  this.database
+    .prepare(
+      "UPDATE items SET quantity = ?, quantity_updated_at = ? WHERE id = ?",
+    )
+    .run(item.quantity - requestedQty, now, itemId);
 
   // 2. 检查并扣减买家余额
   // 3. 增加卖家余额
@@ -666,10 +676,10 @@ async me(@Headers("authorization") auth: string) { ... }
 
 ## 验证策略
 
-| 类型 | 工具 | 覆盖范围 |
-|------|------|----------|
-| API 测试 | `node:test` + `@midwayjs/mock` | 后端接口：状态码、JSON 结构、边界值、权限 |
-| 并发测试 | `node:test` 模拟并发请求 | 同商品同时支付场景 |
-| 组件测试 | `node --test` + JSDOM | 前端组件渲染、交互状态 |
-| 人工验收 | 浏览器手动测试 | 页面跳转、UI 展示、交互流程 |
-| 完整性检查 | `npm run check` | 格式化、Lint、类型检查、测试、构建 |
+| 类型       | 工具                           | 覆盖范围                                  |
+| ---------- | ------------------------------ | ----------------------------------------- |
+| API 测试   | `node:test` + `@midwayjs/mock` | 后端接口：状态码、JSON 结构、边界值、权限 |
+| 并发测试   | `node:test` 模拟并发请求       | 同商品同时支付场景                        |
+| 组件测试   | `node --test` + JSDOM          | 前端组件渲染、交互状态                    |
+| 人工验收   | 浏览器手动测试                 | 页面跳转、UI 展示、交互流程               |
+| 完整性检查 | `npm run check`                | 格式化、Lint、类型检查、测试、构建        |

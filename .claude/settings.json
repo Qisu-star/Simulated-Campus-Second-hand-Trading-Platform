@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test backend/test/auth.integration.test.mts)",
+      "Bash(node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/item.integration.test.mts)"
+    ]
+  }
+}

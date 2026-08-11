@@ -15,6 +15,7 @@
 ## 范围
 
 ### 购物车
+
 - 商品详情页提供"加入购物车"按钮和"立即购买"按钮
 - 购物车页面展示预订单列表（商品、数量、单价、小计）
 - 购物车支持勾选、取消勾选商品
@@ -22,12 +23,14 @@
 - 加购时不锁定库存
 
 ### 虚拟账户
+
 - 每个用户拥有一个虚拟账户
 - 可设置账户余额（演示用途，可自由修改）
 - 可设置支付密码（6 位数字）
 - 支付时选择"虚拟账户"作为支付方式
 
 ### 支付流程
+
 - 从购物车勾选商品后点击"结算"
 - 商品详情页点击"立即购买"：直接跳转至支付页面，相当于单件商品的快捷结算
 - 选择支付方式（仅"虚拟账户"）
@@ -39,6 +42,7 @@
 - "立即购买"场景下，若支付过程中库存被其他用户占用，则支付失败并提示"商品已售罄"
 
 ### 订单管理（买家视角）
+
 - "我的订单"页面包含"购买"和"售出"两个分类标签页
 - "购买"标签页展示该用户的所有购买订单
 - 每笔订单展示商品信息、数量、总价、状态
@@ -47,11 +51,13 @@
 - 已签收后可对该商品进行评价（见 011）
 
 ### 订单管理（商家视角·售出）
+
 - "我的订单"页面的"售出"标签页展示该商家收到的所有订单
 - 订单状态：未交付（买家未签收）→ 已交付（买家已签收）
 - 商家不可主动修改交付状态，由买家签收触发
 
 ### 并发控制
+
 - 支付时通过数据库事务确保库存扣减和余额扣减的原子性
 - 同一商品的并发支付请求由数据库串行化处理，避免超卖
 
@@ -105,51 +111,56 @@
 ## 验收标准
 
 ### 购物车
+
 - **AC-01**：给定已登录用户和合法的商品信息，当请求 `POST /api/cart` 时，返回 201，商品加入购物车成功。
 - **AC-02**：给定同一商品再次加入购物车，购物车中该商品数量累加，不新增记录。
 - **AC-03**：给定未登录用户，当请求 `POST /api/cart` 时，返回 401。
 - **AC-04**：当请求 `GET /api/cart` 时，返回购物车中所有商品及数量。
 
 ### 虚拟账户
+
 - **AC-05**：当请求 `GET /api/account` 时，返回当前用户的账户余额和是否已设置支付密码。
 - **AC-06**：给定合法的余额值，当请求 `PUT /api/account/balance` 时，余额更新成功。
 - **AC-07**：给定非 6 位数字的支付密码，当请求 `PUT /api/account/password` 时，返回 400。
 
 ### 支付
+
 - **AC-08**：给定购物车中商品库存充足、账户余额充足、支付密码正确，当请求 `POST /api/cart/checkout` 时，扣款成功，订单创建成功，返回 200。
 - **AC-09**：给定账户余额不足，当请求 `POST /api/cart/checkout` 时，返回 402 及"余额不足"提示，库存不扣减。
 - **AC-10**：给定购物车中某件商品库存不足，当请求 `POST /api/cart/checkout` 时，该项返回库存不足错误，其他商品正常处理。
 - **AC-15**：给定商品详情页点击"立即购买"，商品库存充足、余额充足，当完成支付时，订单创建成功；若库存已被其他用户占用，则支付失败并提示"商品已售罄"。
 
 ### 订单
+
 - **AC-11**：当请求 `GET /api/orders` 时，返回该用户所有购买订单，按时间倒序排列，每笔包含商品信息、数量、总价和状态。
 - **AC-12**：当请求 `GET /api/orders/sales` 时，返回该商家的所有售出订单，按时间倒序排列。
 - **AC-13**：给定买家点击"确认签收"，当请求 `POST /api/orders/{id}/receive` 时，订单状态变为"已签收"（商家视角变为"已交付"）。
 - **AC-16**："我的订单"页面包含"购买"和"售出"两个标签页，点击切换展示对应列表。
 
 ### 并发
+
 - **AC-14**：当同一商品同时收到两个并发支付请求，且库存仅够满足其中一单时，仅一单成功，另一单返回库存不足错误，不发生超卖。
 
 ## 验证映射
 
-| AC    | 验证方式           | 命令或可复现步骤                   | 结果 / 证据 |
-| ----- | ------------------ | ---------------------------------- | ----------- |
-| AC-01 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-02 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-03 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-04 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-05 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-06 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-07 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-08 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-09 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-10 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-11 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-12 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-13 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-14 | 并发测试           | 并发测试脚本模拟同时支付           | 实现后填写  |
-| AC-15 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-16 | 组件或浏览器测试   | 查看订单页的购买/售出标签页切换   | 实现后填写  |
+| AC    | 验证方式         | 命令或可复现步骤                   | 结果 / 证据 |
+| ----- | ---------------- | ---------------------------------- | ----------- |
+| AC-01 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-02 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-03 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-04 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-05 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-06 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-07 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-08 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-09 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-10 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-11 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-12 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-13 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-14 | 并发测试         | 并发测试脚本模拟同时支付           | 实现后填写  |
+| AC-15 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-16 | 组件或浏览器测试 | 查看订单页的购买/售出标签页切换    | 实现后填写  |
 
 ## 验收记录
 

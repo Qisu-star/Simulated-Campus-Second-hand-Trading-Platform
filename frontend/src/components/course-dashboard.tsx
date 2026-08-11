@@ -112,7 +112,10 @@ export function CourseDashboard() {
           ))}
         </div>
       ) : isLoading ? (
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2" aria-label="正在加载课程">
+        <div
+          className="grid grid-cols-1 gap-5 lg:grid-cols-2"
+          aria-label="正在加载课程"
+        >
           {[0, 1, 2].map((item) => (
             <div
               className="h-48 animate-pulse rounded-2xl bg-slate-200"

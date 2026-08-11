@@ -25,5 +25,28 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "prettier": "^3.6.2"
+  },
+  "dependencies": {
+    "array-union": "^3.0.1",
+    "braces": "^3.0.3",
+    "chokidar": "^5.0.0",
+    "cli-table3": "^0.6.5",
+    "combined-stream": "^1.0.8",
+    "cookiejar": "^2.1.4",
+    "dezalgo": "^1.0.4",
+    "dir-glob": "^3.0.1",
+    "enhanced-resolve": "^5.24.5",
+    "es-set-tostringtag": "^2.1.0",
+    "fill-range": "^7.1.1",
+    "glob-parent": "^6.0.2",
+    "globby": "^16.2.3",
+    "hexoid": "^2.0.0",
+    "is-extglob": "^2.1.1",
+    "is-glob": "^4.0.3",
+    "is-number": "^7.0.0",
+    "mwtsc": "^1.16.0",
+    "path-type": "^6.0.0",
+    "to-regex-range": "^5.0.1",
+    "tsc-alias": "^1.9.1"
   }
 }

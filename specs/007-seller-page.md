@@ -59,15 +59,15 @@
 
 ## 验证映射
 
-| AC    | 验证方式           | 命令或可复现步骤                   | 结果 / 证据 |
-| ----- | ------------------ | ---------------------------------- | ----------- |
-| AC-01 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-02 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-03 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-04 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-05 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-06 | 组件或浏览器测试   | 点击详情页商家名称并检查跳转       | 实现后填写  |
-| AC-07 | API Test / E2E     | 不带认证 token 请求商家主页        | 实现后填写  |
+| AC    | 验证方式         | 命令或可复现步骤                   | 结果 / 证据 |
+| ----- | ---------------- | ---------------------------------- | ----------- |
+| AC-01 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-02 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-03 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-04 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-05 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-06 | 组件或浏览器测试 | 点击详情页商家名称并检查跳转       | 实现后填写  |
+| AC-07 | API Test / E2E   | 不带认证 token 请求商家主页        | 实现后填写  |
 
 ## 验收记录
 

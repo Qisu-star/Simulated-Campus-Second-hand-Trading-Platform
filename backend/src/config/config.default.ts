@@ -11,4 +11,7 @@ export default {
   authDatabase: {
     path: process.env.AUTH_DATABASE_PATH ?? "./data/auth.sqlite",
   },
+  itemDatabase: {
+    path: process.env.ITEM_DATABASE_PATH ?? "./data/items.sqlite",
+  },
 } as MidwayConfig;

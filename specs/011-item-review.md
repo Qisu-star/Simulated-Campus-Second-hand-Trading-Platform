@@ -51,14 +51,14 @@
 
 ## 验证映射
 
-| AC    | 验证方式           | 命令或可复现步骤                   | 结果 / 证据 |
-| ----- | ------------------ | ---------------------------------- | ----------- |
-| AC-01 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-02 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-03 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-04 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-05 | 组件或浏览器测试   | 评价后查看商品详情页               | 实现后填写  |
-| AC-06 | 组件或浏览器测试   | 评价后查看商家主页近期评价         | 实现后填写  |
+| AC    | 验证方式         | 命令或可复现步骤                   | 结果 / 证据 |
+| ----- | ---------------- | ---------------------------------- | ----------- |
+| AC-01 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-02 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-03 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-04 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-05 | 组件或浏览器测试 | 评价后查看商品详情页               | 实现后填写  |
+| AC-06 | 组件或浏览器测试 | 评价后查看商家主页近期评价         | 实现后填写  |
 
 ## 验收记录
 

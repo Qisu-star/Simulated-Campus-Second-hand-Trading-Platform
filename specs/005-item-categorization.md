@@ -63,16 +63,16 @@
 
 ## 验证映射
 
-| AC    | 验证方式           | 命令或可复现步骤                   | 结果 / 证据 |
-| ----- | ------------------ | ---------------------------------- | ----------- |
-| AC-01 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-02 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-03 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-04 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-05 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-06 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-07 | 组件或浏览器测试   | 查看商品详情页的分类标签           | 实现后填写  |
-| AC-08 | 组件或浏览器测试   | 点击分类按钮并检查商品列表变化     | 实现后填写  |
+| AC    | 验证方式         | 命令或可复现步骤                   | 结果 / 证据 |
+| ----- | ---------------- | ---------------------------------- | ----------- |
+| AC-01 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-02 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-03 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-04 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-05 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-06 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-07 | 组件或浏览器测试 | 查看商品详情页的分类标签           | 实现后填写  |
+| AC-08 | 组件或浏览器测试 | 点击分类按钮并检查商品列表变化     | 实现后填写  |
 
 ## 验收记录
 

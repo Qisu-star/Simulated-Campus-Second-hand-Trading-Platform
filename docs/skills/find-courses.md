@@ -18,12 +18,12 @@
 
 ## 契约对齐
 
-| 项 | 当前事实 |
-| -- | -------- |
-| Method / Path | `GET /api/courses` |
-| 成功体 | `{ "data": Course[] }`，`Course` 含 `id`、`title`、`description`、`createdAt` |
-| 空列表 | `200` + `{ "data": [] }`，不是错误 |
-| 服务端筛选 | 无；禁止在请求中虚构 `?keyword=` |
+| 项            | 当前事实                                                                      |
+| ------------- | ----------------------------------------------------------------------------- |
+| Method / Path | `GET /api/courses`                                                            |
+| 成功体        | `{ "data": Course[] }`，`Course` 含 `id`、`title`、`description`、`createdAt` |
+| 空列表        | `200` + `{ "data": [] }`，不是错误                                            |
+| 服务端筛选    | 无；禁止在请求中虚构 `?keyword=`                                              |
 
 权威 Schema 见 [`contracts/openapi.yaml`](../../contracts/openapi.yaml)。
 

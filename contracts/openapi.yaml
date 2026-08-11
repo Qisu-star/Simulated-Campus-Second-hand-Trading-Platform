@@ -186,6 +186,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/items:
+    get:
+      operationId: listItems
+      summary: 获取商品列表（分页，可选分类筛选）
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码，从 1 开始
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: 分类筛选（可选，传"全部"或不传则不筛选）
+      responses:
+        "200":
+          description: 商品列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemListResponse"
+  /api/categories:
+    get:
+      operationId: listCategories
+      summary: 获取固定分类列表
+      responses:
+        "200":
+          description: 分类列表
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: string
 components:
   securitySchemes:
     bearerAuth:
@@ -289,3 +338,52 @@ components:
       properties:
         message:
           type: string
+    Item:
+      type: object
+      required: [id, title, price, quantity, description, images, coverImage, category, sellerId, sellerName, status, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        price:
+          type: number
+          format: float
+        quantity:
+          type: integer
+        description:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        coverImage:
+          type: string
+        category:
+          type: string
+        sellerId:
+          type: integer
+        sellerName:
+          type: string
+        status:
+          type: string
+          enum: [pending, active, delisted]
+        createdAt:
+          type: string
+          format: date-time
+        quantityUpdatedAt:
+          type: string
+          format: date-time
+          nullable: true
+    ItemListResponse:
+      type: object
+      required: [data, total, totalPages]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Item"
+        total:
+          type: integer
+        totalPages:
+          type: integer

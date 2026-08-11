@@ -56,15 +56,15 @@
 
 ## 验证映射
 
-| AC    | 验证方式           | 命令或可复现步骤                   | 结果 / 证据 |
-| ----- | ------------------ | ---------------------------------- | ----------- |
-| AC-01 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-02 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-03 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-04 | 组件或浏览器测试   | 延迟请求并观察商品区域             | 实现后填写  |
-| AC-05 | 组件或浏览器测试   | 返回在售商品列表并检查卡片内容     | 实现后填写  |
-| AC-06 | 组件或浏览器测试   | 请求返回非 2xx 并检查错误反馈      | 实现后填写  |
-| AC-07 | API Test / E2E     | 不带认证 token 请求浏览页          | 实现后填写  |
+| AC    | 验证方式         | 命令或可复现步骤                   | 结果 / 证据 |
+| ----- | ---------------- | ---------------------------------- | ----------- |
+| AC-01 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-02 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-03 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-04 | 组件或浏览器测试 | 延迟请求并观察商品区域             | 实现后填写  |
+| AC-05 | 组件或浏览器测试 | 返回在售商品列表并检查卡片内容     | 实现后填写  |
+| AC-06 | 组件或浏览器测试 | 请求返回非 2xx 并检查错误反馈      | 实现后填写  |
+| AC-07 | API Test / E2E   | 不带认证 token 请求浏览页          | 实现后填写  |
 
 ## 验收记录
 

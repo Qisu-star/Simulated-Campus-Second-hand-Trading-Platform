@@ -60,17 +60,17 @@
 
 ## 验证映射
 
-| AC    | 验证方式           | 命令或可复现步骤                   | 结果 / 证据 |
-| ----- | ------------------ | ---------------------------------- | ----------- |
-| AC-01 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-02 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-03 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-04 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-05 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-06 | API Test           | `npm run test --workspace backend` | 实现后填写  |
-| AC-07 | 组件或浏览器测试   | 连续搜索 11 条不同关键词并检查历史  | 实现后填写  |
-| AC-08 | 组件或浏览器测试   | 重复搜索同一关键词并检查历史位置    | 实现后填写  |
-| AC-09 | 组件或浏览器测试   | 点击搜索栏、历史记录、外部区域操作  | 实现后填写  |
+| AC    | 验证方式         | 命令或可复现步骤                   | 结果 / 证据 |
+| ----- | ---------------- | ---------------------------------- | ----------- |
+| AC-01 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-02 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-03 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-04 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-05 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-06 | API Test         | `npm run test --workspace backend` | 实现后填写  |
+| AC-07 | 组件或浏览器测试 | 连续搜索 11 条不同关键词并检查历史 | 实现后填写  |
+| AC-08 | 组件或浏览器测试 | 重复搜索同一关键词并检查历史位置   | 实现后填写  |
+| AC-09 | 组件或浏览器测试 | 点击搜索栏、历史记录、外部区域操作 | 实现后填写  |
 
 ## 验收记录
 
