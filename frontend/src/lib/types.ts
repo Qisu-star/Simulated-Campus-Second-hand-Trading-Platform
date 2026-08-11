@@ -27,7 +27,8 @@ export interface ItemDetailResponse {
   };
 }
 
-export type Category = "全部" | "衣物" | "书籍" | "电子设备" | "运动" | "食物" | "其它";
+export type Category =
+  "全部" | "衣物" | "书籍" | "电子设备" | "运动" | "食物" | "其它";
 
 export const CATEGORIES: Category[] = [
   "全部",
@@ -108,7 +109,7 @@ export interface Order {
   id: number;
   userId: number;
   totalPrice: number;
-  status: 'pending_receipt' | 'received';
+  status: "pending_receipt" | "received";
   createdAt: string;
   items: OrderItem[];
 }

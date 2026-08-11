@@ -86,21 +86,24 @@ export default function SellerPage({
     [id],
   );
 
-  const fetchReviews = useCallback(async (pageNum: number) => {
-    setReviewLoading(true);
-    try {
-      const response = await api.get<ReviewListResponse>(
-        `/api/sellers/${id}/reviews?days=30&page=${pageNum}&pageSize=10`,
-      );
-      setReviews(response.data);
-      setReviewTotal(response.total);
-      setReviewTotalPages(response.totalPages);
-    } catch {
-      // ignore
-    } finally {
-      setReviewLoading(false);
-    }
-  }, [id]);
+  const fetchReviews = useCallback(
+    async (pageNum: number) => {
+      setReviewLoading(true);
+      try {
+        const response = await api.get<ReviewListResponse>(
+          `/api/sellers/${id}/reviews?days=30&page=${pageNum}&pageSize=10`,
+        );
+        setReviews(response.data);
+        setReviewTotal(response.total);
+        setReviewTotalPages(response.totalPages);
+      } catch {
+        // ignore
+      } finally {
+        setReviewLoading(false);
+      }
+    },
+    [id],
+  );
 
   const loadData = useCallback(async () => {
     const sellerOk = await fetchSeller();
@@ -191,9 +194,7 @@ export default function SellerPage({
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10 sm:px-10 sm:py-16">
         <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-700">
-          <p className="text-lg font-semibold text-slate-900">
-            商家未找到
-          </p>
+          <p className="text-lg font-semibold text-slate-900">商家未找到</p>
           <p className="mt-2 text-sm text-slate-600">
             该商家不存在，请返回首页查看其他商品。
           </p>
@@ -382,10 +383,7 @@ export default function SellerPage({
         {reviewLoading ? (
           <div className="animate-pulse space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-24 rounded-xl bg-slate-200"
-              />
+              <div key={index} className="h-24 rounded-xl bg-slate-200" />
             ))}
           </div>
         ) : reviews.length > 0 ? (
@@ -466,7 +464,9 @@ export default function SellerPage({
                 <button
                   className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={reviewPage >= reviewTotalPages}
-                  onClick={() => setReviewPage((p) => Math.min(reviewTotalPages, p + 1))}
+                  onClick={() =>
+                    setReviewPage((p) => Math.min(reviewTotalPages, p + 1))
+                  }
                   type="button"
                 >
                   下一页

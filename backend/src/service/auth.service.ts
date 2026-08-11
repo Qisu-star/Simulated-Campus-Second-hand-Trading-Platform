@@ -49,7 +49,9 @@ export class AuthService {
     if (!adminRow) {
       const hashedPassword = hashPassword("admin123");
       this.database
-        .prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)")
+        .prepare(
+          "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+        )
         .run("admin", hashedPassword, "admin");
     }
   }
@@ -70,7 +72,9 @@ export class AuthService {
       .run(username, hashedPassword);
 
     const row = this.database
-      .prepare("SELECT id, username, password, role, created_at FROM users WHERE id = ?")
+      .prepare(
+        "SELECT id, username, password, role, created_at FROM users WHERE id = ?",
+      )
       .get(result.lastInsertRowid) as UserRow;
 
     const token = generateToken({ userId: row.id });
@@ -79,7 +83,9 @@ export class AuthService {
 
   login(username: string, password: string): { user: User; token: string } {
     const row = this.database
-      .prepare("SELECT id, username, password, role, created_at FROM users WHERE username = ?")
+      .prepare(
+        "SELECT id, username, password, role, created_at FROM users WHERE username = ?",
+      )
       .get(username) as UserRow | undefined;
 
     if (!row || !verifyPassword(password, row.password)) {
@@ -101,7 +107,9 @@ export class AuthService {
     }
 
     const row = this.database
-      .prepare("SELECT id, username, password, role, created_at FROM users WHERE id = ?")
+      .prepare(
+        "SELECT id, username, password, role, created_at FROM users WHERE id = ?",
+      )
       .get(payload.userId) as UserRow | undefined;
 
     if (!row) {
@@ -118,14 +126,20 @@ export class AuthService {
     return row ? mapUser(row) : null;
   }
 
-  updatePassword(token: string, currentPassword: string, newPassword: string): void {
+  updatePassword(
+    token: string,
+    currentPassword: string,
+    newPassword: string,
+  ): void {
     const payload = verifyToken(token);
     if (!payload) {
       throw new Error("未登录或登录已过期");
     }
 
     const row = this.database
-      .prepare("SELECT id, username, password, role, created_at FROM users WHERE id = ?")
+      .prepare(
+        "SELECT id, username, password, role, created_at FROM users WHERE id = ?",
+      )
       .get(payload.userId) as UserRow | undefined;
 
     if (!row) {

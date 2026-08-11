@@ -77,7 +77,14 @@ export function ItemForm({
     if (!validate()) {
       return;
     }
-    await onSubmit({ title: title.trim(), price, quantity, category, description, images });
+    await onSubmit({
+      title: title.trim(),
+      price,
+      quantity,
+      category,
+      description,
+      images,
+    });
   };
 
   const filteredCategories = CATEGORIES.filter((c) => c !== "全部");

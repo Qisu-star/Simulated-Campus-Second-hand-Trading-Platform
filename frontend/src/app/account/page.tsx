@@ -102,7 +102,9 @@ export default function AccountPage() {
         setSuccessMessage("支付密码设置成功");
         setPassword("");
         setConfirmPassword("");
-        setAccountInfo((prev) => (prev ? { ...prev, hasPaymentPassword: true } : prev));
+        setAccountInfo((prev) =>
+          prev ? { ...prev, hasPaymentPassword: true } : prev,
+        );
       } catch (reason) {
         if (reason instanceof ApiError) {
           setErrorMessage(reason.message);

@@ -4,8 +4,17 @@ import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
-import type { Item, ItemDetailResponse, ToggleFavoriteResponse } from "@/lib/types";
-import type { Review, ReviewListResponse, Order, OrderListResponse } from "@/lib/types";
+import type {
+  Item,
+  ItemDetailResponse,
+  ToggleFavoriteResponse,
+} from "@/lib/types";
+import type {
+  Review,
+  ReviewListResponse,
+  Order,
+  OrderListResponse,
+} from "@/lib/types";
 import { ReviewForm } from "./ReviewForm";
 import { ReviewList } from "./ReviewList";
 
@@ -17,7 +26,9 @@ export default function ItemDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const [item, setItem] = useState<(Item & { isItemFavorited: boolean; isSellerFavorited: boolean }) | null>(null);
+  const [item, setItem] = useState<
+    (Item & { isItemFavorited: boolean; isSellerFavorited: boolean }) | null
+  >(null);
   const [pageState, setPageState] = useState<PageState>("loading");
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -48,15 +59,16 @@ export default function ItemDetailPage({
   const fetchItem = useCallback(async () => {
     setPageState("loading");
     try {
-      const response = await api.get<ItemDetailResponse>(
-        `/api/items/${id}`,
-      );
+      const response = await api.get<ItemDetailResponse>(`/api/items/${id}`);
       setItem(response.data);
       setPageState("success");
       setErrorMessage("");
     } catch (reason) {
       if (reason instanceof Error) {
-        if (reason.message.includes("404") || reason.message.includes("不存在")) {
+        if (
+          reason.message.includes("404") ||
+          reason.message.includes("不存在")
+        ) {
           setPageState("notfound");
         } else {
           setErrorMessage(reason.message);
@@ -69,21 +81,24 @@ export default function ItemDetailPage({
     }
   }, [id]);
 
-  const fetchReviews = useCallback(async (pageNum: number) => {
-    setReviewLoading(true);
-    try {
-      const response = await api.get<ReviewListResponse>(
-        `/api/items/${id}/reviews?page=${pageNum}&pageSize=10`,
-      );
-      setReviews(response.data);
-      setReviewTotal(response.total);
-      setReviewTotalPages(response.totalPages);
-    } catch {
-      // ignore
-    } finally {
-      setReviewLoading(false);
-    }
-  }, [id]);
+  const fetchReviews = useCallback(
+    async (pageNum: number) => {
+      setReviewLoading(true);
+      try {
+        const response = await api.get<ReviewListResponse>(
+          `/api/items/${id}/reviews?page=${pageNum}&pageSize=10`,
+        );
+        setReviews(response.data);
+        setReviewTotal(response.total);
+        setReviewTotalPages(response.totalPages);
+      } catch {
+        // ignore
+      } finally {
+        setReviewLoading(false);
+      }
+    },
+    [id],
+  );
 
   const checkCanReview = useCallback(async () => {
     if (!isAuthenticated() || !item) {
@@ -326,9 +341,7 @@ export default function ItemDetailPage({
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10 sm:px-10 sm:py-16">
         <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-700">
-          <p className="text-lg font-semibold text-slate-900">
-            商品未找到
-          </p>
+          <p className="text-lg font-semibold text-slate-900">商品未找到</p>
           <p className="mt-2 text-sm text-slate-600">
             该商品不存在或已下架，请返回首页查看其他商品。
           </p>
@@ -349,11 +362,12 @@ export default function ItemDetailPage({
   }
 
   const isSoldOut = item.quantity === 0;
-  const allImages: string[] = item.images.length > 0
-    ? item.images
-    : item.coverImage
-      ? [item.coverImage]
-      : [];
+  const allImages: string[] =
+    item.images.length > 0
+      ? item.images
+      : item.coverImage
+        ? [item.coverImage]
+        : [];
   const displayImage = allImages[selectedImageIndex] || item.coverImage;
 
   return (
@@ -433,9 +447,7 @@ export default function ItemDetailPage({
             </span>
             <span
               className={`text-base ${
-                isSoldOut
-                  ? "font-semibold text-rose-500"
-                  : "text-slate-500"
+                isSoldOut ? "font-semibold text-rose-500" : "text-slate-500"
               }`}
             >
               {isSoldOut ? "已售罄" : `库存 ${item.quantity} 件`}
@@ -599,10 +611,14 @@ export default function ItemDetailPage({
               {cartLoading ? "加入中..." : "加入购物车"}
             </button>
             {cartMessage && (
-              <p className="text-center text-sm font-semibold text-emerald-600">{cartMessage}</p>
+              <p className="text-center text-sm font-semibold text-emerald-600">
+                {cartMessage}
+              </p>
             )}
             {cartError && (
-              <p className="text-center text-sm font-semibold text-rose-600">{cartError}</p>
+              <p className="text-center text-sm font-semibold text-rose-600">
+                {cartError}
+              </p>
             )}
           </div>
         </section>
@@ -648,7 +664,9 @@ export default function ItemDetailPage({
                   <button
                     className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                     disabled={buyQuantity >= item.quantity}
-                    onClick={() => setBuyQuantity((q) => Math.min(item.quantity, q + 1))}
+                    onClick={() =>
+                      setBuyQuantity((q) => Math.min(item.quantity, q + 1))
+                    }
                     type="button"
                   >
                     +
@@ -711,9 +729,7 @@ export default function ItemDetailPage({
         aria-label="商品评价"
         className="mt-16 border-t border-slate-100 pt-10"
       >
-        <h2 className="mb-6 text-xl font-bold text-slate-900">
-          商品评价
-        </h2>
+        <h2 className="mb-6 text-xl font-bold text-slate-900">商品评价</h2>
 
         {/* Review form for eligible users */}
         {canReview && eligibleOrderId && (
@@ -733,10 +749,7 @@ export default function ItemDetailPage({
         {reviewLoading ? (
           <div className="animate-pulse space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-24 rounded-xl bg-slate-200"
-              />
+              <div key={index} className="h-24 rounded-xl bg-slate-200" />
             ))}
           </div>
         ) : (
@@ -746,7 +759,9 @@ export default function ItemDetailPage({
             total={reviewTotal}
             totalPages={reviewTotalPages}
             onPrevPage={() => setReviewPage((p) => Math.max(1, p - 1))}
-            onNextPage={() => setReviewPage((p) => Math.min(reviewTotalPages, p + 1))}
+            onNextPage={() =>
+              setReviewPage((p) => Math.min(reviewTotalPages, p + 1))
+            }
           />
         )}
       </section>

@@ -124,7 +124,11 @@ describe("seller item management API", { concurrency: false }, () => {
   test("AC-04: PUT /api/items/:id updates own item (200)", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "编辑测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "编辑测试",
+          "password123",
+        );
 
         // Create an item first
         const createResponse = await request
@@ -212,7 +216,11 @@ describe("seller item management API", { concurrency: false }, () => {
   test("AC-06: PATCH /api/items/:id/status delists item; delisted item not in public list but visible in my-items", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "下架测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "下架测试",
+          "password123",
+        );
 
         // Create an item
         const createResponse = await request
@@ -268,7 +276,11 @@ describe("seller item management API", { concurrency: false }, () => {
   test("AC-07: GET /api/items/mine returns all user's items sorted by created_at DESC", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "列表测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "列表测试",
+          "password123",
+        );
 
         // Create multiple items
         await request
@@ -305,8 +317,8 @@ describe("seller item management API", { concurrency: false }, () => {
         assert.equal(myItems.body.total, 2);
 
         // Items should be sorted by created_at DESC
-        const dates = myItems.body.data.map(
-          (item: { createdAt: string }) => new Date(item.createdAt).getTime(),
+        const dates = myItems.body.data.map((item: { createdAt: string }) =>
+          new Date(item.createdAt).getTime(),
         );
         for (let i = 1; i < dates.length; i++) {
           assert.ok(
@@ -325,7 +337,11 @@ describe("seller item management API", { concurrency: false }, () => {
   test("Delist own item (PATCH) by owner succeeds", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "下架拥有者", "password123");
+        const token = await registerAndLogin(
+          request,
+          "下架拥有者",
+          "password123",
+        );
 
         // Create an item
         const createResponse = await request
@@ -418,9 +434,7 @@ describe("seller item management API", { concurrency: false }, () => {
 
         const adminToken = loginResponse.body.token;
 
-        const response = await request
-          .get("/api/items")
-          .expect(200);
+        const response = await request.get("/api/items").expect(200);
 
         // The item with quantity=0 for 8 days (id=999) should be auto-delisted, so not in public list
         const expiredItem = response.body.data.find(
@@ -436,8 +450,15 @@ describe("seller item management API", { concurrency: false }, () => {
         const recentItem = response.body.data.find(
           (item: { id: number }) => item.id === 998,
         );
-        assert.ok(recentItem, "item with quantity=0 for <7 days should still be in public list");
-        assert.equal(recentItem.status, "active", "recently sold-out item should still be active");
+        assert.ok(
+          recentItem,
+          "item with quantity=0 for <7 days should still be in public list",
+        );
+        assert.equal(
+          recentItem.status,
+          "active",
+          "recently sold-out item should still be active",
+        );
 
         // Verify the expired item is still visible in my-items (as delisted)
         const myItems = await request
@@ -448,8 +469,15 @@ describe("seller item management API", { concurrency: false }, () => {
         const myExpiredItem = myItems.body.data.find(
           (item: { id: number }) => item.id === 999,
         );
-        assert.ok(myExpiredItem, "auto-delisted item should still be visible in my-items");
-        assert.equal(myExpiredItem.status, "delisted", "auto-delisted item should have delisted status");
+        assert.ok(
+          myExpiredItem,
+          "auto-delisted item should still be visible in my-items",
+        );
+        assert.equal(
+          myExpiredItem.status,
+          "delisted",
+          "auto-delisted item should have delisted status",
+        );
       },
       undefined,
       (databasePath) => {
@@ -462,7 +490,11 @@ describe("seller item management API", { concurrency: false }, () => {
   test("GET /api/items/mine returns paginated results", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "分页测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "分页测试",
+          "password123",
+        );
 
         // Create 3 items
         for (let i = 1; i <= 3; i++) {
@@ -506,9 +538,7 @@ describe("seller item management API", { concurrency: false }, () => {
 
   test("GET /api/items/mine without auth returns 401", async () => {
     await withApi(async (request) => {
-      const response = await request
-        .get("/api/items/mine")
-        .expect(401);
+      const response = await request.get("/api/items/mine").expect(401);
 
       assert.ok(response.body, "response should have a body");
     });
@@ -603,7 +633,9 @@ describe("seller page API", { concurrency: false }, () => {
   test("GET /api/sellers/:id/reviews returns empty array", async () => {
     await withApi(
       async (request) => {
-        const response = await request.get("/api/sellers/1/reviews").expect(200);
+        const response = await request
+          .get("/api/sellers/1/reviews")
+          .expect(200);
 
         assert.deepEqual(response.body.data, []);
         assert.equal(response.body.total, 0);
@@ -619,7 +651,9 @@ describe("seller page API", { concurrency: false }, () => {
   test("Non-existent seller for items returns 404", async () => {
     await withApi(
       async (request) => {
-        const response = await request.get("/api/sellers/999/items").expect(404);
+        const response = await request
+          .get("/api/sellers/999/items")
+          .expect(404);
 
         assert.ok(response.body, "should have a response body");
       },
@@ -633,7 +667,9 @@ describe("seller page API", { concurrency: false }, () => {
   test("Non-existent seller for reviews returns 404", async () => {
     await withApi(
       async (request) => {
-        const response = await request.get("/api/sellers/999/reviews").expect(404);
+        const response = await request
+          .get("/api/sellers/999/reviews")
+          .expect(404);
 
         assert.ok(response.body, "should have a response body");
       },
@@ -725,7 +761,9 @@ async function openApplication(databasePath: string) {
     baseDir: compiledSourceDirectory,
     globalConfig: {
       itemDatabase: { path: databasePath },
-      authDatabase: { path: databasePath.replace("items.sqlite", "auth.sqlite") },
+      authDatabase: {
+        path: databasePath.replace("items.sqlite", "auth.sqlite"),
+      },
       koa: { port: null },
     },
   });
@@ -797,7 +835,18 @@ function seedAutoDelistItems(databasePath: string) {
         `INSERT INTO items (id, title, price, quantity, description, category, seller_id, seller_name, status, quantity_updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
-      .run(999, "已过期商品", 10, 0, "库存为0已超过7天", "书籍", 1, "admin", "active", eightDaysAgo);
+      .run(
+        999,
+        "已过期商品",
+        10,
+        0,
+        "库存为0已超过7天",
+        "书籍",
+        1,
+        "admin",
+        "active",
+        eightDaysAgo,
+      );
 
     // Insert an item with quantity=0 and quantity_updated_at 3 days ago (should NOT be auto-delisted)
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
@@ -810,7 +859,18 @@ function seedAutoDelistItems(databasePath: string) {
         `INSERT INTO items (id, title, price, quantity, description, category, seller_id, seller_name, status, quantity_updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
-      .run(998, "近期售罄商品", 20, 0, "库存为0但未超过7天", "电子设备", 1, "admin", "active", threeDaysAgo);
+      .run(
+        998,
+        "近期售罄商品",
+        20,
+        0,
+        "库存为0但未超过7天",
+        "电子设备",
+        1,
+        "admin",
+        "active",
+        threeDaysAgo,
+      );
   } finally {
     database.close();
   }
@@ -845,15 +905,75 @@ function seedSellerItems(databasePath: string) {
     const coverImage = "https://picsum.photos/seed/test/400/300";
 
     // Active items for seller 1
-    insert.run(1, "卖家书籍商品", 25, 1, "书籍描述", "书籍", 1, "seller1", "active", "2026-08-10 12:00:00", coverImage);
-    insert.run(2, "卖家衣物商品", 30, 5, "衣物描述", "衣物", 1, "seller1", "active", "2026-08-08 12:00:00", coverImage);
-    insert.run(3, "卖家电子设备", 100, 2, "电子设备描述", "电子设备", 1, "seller1", "active", "2026-08-05 12:00:00", coverImage);
+    insert.run(
+      1,
+      "卖家书籍商品",
+      25,
+      1,
+      "书籍描述",
+      "书籍",
+      1,
+      "seller1",
+      "active",
+      "2026-08-10 12:00:00",
+      coverImage,
+    );
+    insert.run(
+      2,
+      "卖家衣物商品",
+      30,
+      5,
+      "衣物描述",
+      "衣物",
+      1,
+      "seller1",
+      "active",
+      "2026-08-08 12:00:00",
+      coverImage,
+    );
+    insert.run(
+      3,
+      "卖家电子设备",
+      100,
+      2,
+      "电子设备描述",
+      "电子设备",
+      1,
+      "seller1",
+      "active",
+      "2026-08-05 12:00:00",
+      coverImage,
+    );
 
     // Delisted item for seller 1 (should NOT appear in seller items)
-    insert.run(4, "卖家已下架商品", 50, 0, "已下架", "书籍", 1, "seller1", "delisted", "2026-08-01 12:00:00", coverImage);
+    insert.run(
+      4,
+      "卖家已下架商品",
+      50,
+      0,
+      "已下架",
+      "书籍",
+      1,
+      "seller1",
+      "delisted",
+      "2026-08-01 12:00:00",
+      coverImage,
+    );
 
     // Active item for seller 2 (should NOT appear when querying seller 1)
-    insert.run(5, "其他商家商品", 40, 3, "其他商家", "运动", 2, "seller2", "active", "2026-08-03 12:00:00", coverImage);
+    insert.run(
+      5,
+      "其他商家商品",
+      40,
+      3,
+      "其他商家",
+      "运动",
+      2,
+      "seller2",
+      "active",
+      "2026-08-03 12:00:00",
+      coverImage,
+    );
   } finally {
     database.close();
   }

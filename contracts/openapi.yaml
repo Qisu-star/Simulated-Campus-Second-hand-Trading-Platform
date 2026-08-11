@@ -1471,7 +1471,21 @@ components:
           type: string
     Item:
       type: object
-      required: [id, title, price, quantity, description, images, coverImage, category, sellerId, sellerName, status, createdAt]
+      required:
+        [
+          id,
+          title,
+          price,
+          quantity,
+          description,
+          images,
+          coverImage,
+          category,
+          sellerId,
+          sellerName,
+          status,
+          createdAt,
+        ]
       properties:
         id:
           type: integer
@@ -1718,7 +1732,20 @@ components:
           description: 数量
     CartItem:
       type: object
-      required: [id, userId, itemId, quantity, selected, createdAt, title, price, coverImage, stock, status]
+      required:
+        [
+          id,
+          userId,
+          itemId,
+          quantity,
+          selected,
+          createdAt,
+          title,
+          price,
+          coverImage,
+          stock,
+          status,
+        ]
       properties:
         id:
           type: integer
@@ -1765,7 +1792,8 @@ components:
           type: string
     OrderItem:
       type: object
-      required: [id, orderId, itemId, sellerId, title, price, quantity, coverImage]
+      required:
+        [id, orderId, itemId, sellerId, title, price, quantity, coverImage]
       properties:
         id:
           type: integer
@@ -1817,7 +1845,18 @@ components:
           type: integer
     Review:
       type: object
-      required: [id, userId, orderId, itemId, sellerId, rating, comment, username, createdAt]
+      required:
+        [
+          id,
+          userId,
+          orderId,
+          itemId,
+          sellerId,
+          rating,
+          comment,
+          username,
+          createdAt,
+        ]
       properties:
         id:
           type: integer

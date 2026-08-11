@@ -69,8 +69,7 @@ export default function AdminReviewsPage() {
         setPage((p) => p - 1);
       }
     } catch (reason) {
-      const message =
-        reason instanceof Error ? reason.message : "操作失败";
+      const message = reason instanceof Error ? reason.message : "操作失败";
       alert(message);
     } finally {
       setActionLoading(null);
@@ -90,8 +89,7 @@ export default function AdminReviewsPage() {
         setPage((p) => p - 1);
       }
     } catch (reason) {
-      const message =
-        reason instanceof Error ? reason.message : "操作失败";
+      const message = reason instanceof Error ? reason.message : "操作失败";
       alert(message);
     } finally {
       setActionLoading(null);
@@ -113,9 +111,7 @@ export default function AdminReviewsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
             审核管理
           </h1>
-          <p className="mt-1 text-slate-600">
-            共 {total} 件待审核商品
-          </p>
+          <p className="mt-1 text-slate-600">共 {total} 件待审核商品</p>
         </div>
       </header>
 
@@ -165,9 +161,7 @@ export default function AdminReviewsPage() {
             <p className="text-lg font-semibold text-slate-900">
               暂无待审核商品
             </p>
-            <p className="mt-2 text-sm text-slate-600">
-              所有商品已审核完毕。
-            </p>
+            <p className="mt-2 text-sm text-slate-600">所有商品已审核完毕。</p>
           </div>
         )}
 
@@ -214,7 +208,8 @@ export default function AdminReviewsPage() {
                       </p>
                     )}
                     <p className="mt-1 text-xs text-slate-400">
-                      发布时间：{new Date(item.createdAt).toLocaleString("zh-CN")}
+                      发布时间：
+                      {new Date(item.createdAt).toLocaleString("zh-CN")}
                     </p>
                   </div>
 

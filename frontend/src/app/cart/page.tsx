@@ -60,50 +60,48 @@ export default function CartPage() {
     }
   }, [pageState, cartItems.length, fetchCart]);
 
-  const handleToggleSelect = useCallback(
-    async (item: CartItem) => {
-      const newSelected = !item.selected;
-      // Optimistic update
+  const handleToggleSelect = useCallback(async (item: CartItem) => {
+    const newSelected = !item.selected;
+    // Optimistic update
+    setCartItems((prev) =>
+      prev.map((ci) =>
+        ci.id === item.id ? { ...ci, selected: newSelected } : ci,
+      ),
+    );
+
+    try {
+      await api.patch(`/api/cart/${item.id}/select`, { selected: newSelected });
+    } catch {
+      // Revert
       setCartItems((prev) =>
-        prev.map((ci) => (ci.id === item.id ? { ...ci, selected: newSelected } : ci)),
+        prev.map((ci) =>
+          ci.id === item.id ? { ...ci, selected: !newSelected } : ci,
+        ),
       );
+    }
+  }, []);
 
-      try {
-        await api.patch(`/api/cart/${item.id}/select`, { selected: newSelected });
-      } catch {
-        // Revert
-        setCartItems((prev) =>
-          prev.map((ci) => (ci.id === item.id ? { ...ci, selected: !newSelected } : ci)),
-        );
-      }
-    },
-    [],
-  );
-
-  const handleDelete = useCallback(
-    async (item: CartItem) => {
-      setLoadingItemId(item.id);
-      try {
-        await api.del(`/api/cart/${item.id}`);
-        setCartItems((prev) => {
-          const updated = prev.filter((ci) => ci.id !== item.id);
-          if (updated.length === 0) {
-            setPageState("empty");
-          }
-          return updated;
-        });
-      } catch (reason) {
-        if (reason instanceof ApiError) {
-          setErrorMessage(reason.message);
-        } else {
-          setErrorMessage("删除失败");
+  const handleDelete = useCallback(async (item: CartItem) => {
+    setLoadingItemId(item.id);
+    try {
+      await api.del(`/api/cart/${item.id}`);
+      setCartItems((prev) => {
+        const updated = prev.filter((ci) => ci.id !== item.id);
+        if (updated.length === 0) {
+          setPageState("empty");
         }
-      } finally {
-        setLoadingItemId(null);
+        return updated;
+      });
+    } catch (reason) {
+      if (reason instanceof ApiError) {
+        setErrorMessage(reason.message);
+      } else {
+        setErrorMessage("删除失败");
       }
-    },
-    [],
-  );
+    } finally {
+      setLoadingItemId(null);
+    }
+  }, []);
 
   const selectedItems = cartItems.filter((item) => item.selected);
   const totalPrice = selectedItems.reduce(
@@ -164,7 +162,9 @@ export default function CartPage() {
           <p className="mt-2 text-sm">{errorMessage}</p>
           <button
             className="mt-4 rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
-            onClick={() => { setPageState("ready"); }}
+            onClick={() => {
+              setPageState("ready");
+            }}
             type="button"
           >
             重试
@@ -364,7 +364,10 @@ export default function CartPage() {
               确认支付
             </h2>
             <p className="mb-4 text-sm text-slate-500">
-              支付金额：<span className="font-bold text-rose-600">¥{totalPrice.toFixed(2)}</span>
+              支付金额：
+              <span className="font-bold text-rose-600">
+                ¥{totalPrice.toFixed(2)}
+              </span>
             </p>
 
             {paymentError && (

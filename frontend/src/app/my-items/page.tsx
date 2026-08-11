@@ -38,8 +38,7 @@ export default function MyItemsPage() {
       setPageState(response.data.length === 0 ? "empty" : "success");
       setErrorMessage("");
     } catch (reason) {
-      const message =
-        reason instanceof Error ? reason.message : "加载商品失败";
+      const message = reason instanceof Error ? reason.message : "加载商品失败";
       setErrorMessage(message);
       setPageState("error");
     }
@@ -60,8 +59,7 @@ export default function MyItemsPage() {
       await api.patch(`/api/items/${itemId}/status`, { status: newStatus });
       void fetchMyItems(page);
     } catch (reason) {
-      const message =
-        reason instanceof Error ? reason.message : "操作失败";
+      const message = reason instanceof Error ? reason.message : "操作失败";
       alert(message);
     } finally {
       setActionLoading(null);
@@ -76,7 +74,8 @@ export default function MyItemsPage() {
     setPage((p) => Math.min(totalPages, p + 1));
   };
 
-  const isSoldOut = (item: Item) => item.quantity === 0 && item.status === "active";
+  const isSoldOut = (item: Item) =>
+    item.quantity === 0 && item.status === "active";
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10 sm:px-10 sm:py-16">
@@ -85,9 +84,7 @@ export default function MyItemsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
             我的商品
           </h1>
-          <p className="mt-1 text-slate-600">
-            共 {total} 件商品
-          </p>
+          <p className="mt-1 text-slate-600">共 {total} 件商品</p>
         </div>
         <a
           className="rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"

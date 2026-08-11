@@ -19,7 +19,11 @@ describe("favorites API", { concurrency: false }, () => {
   test("AC-01: POST /api/favorites/items/:id favorites an item (toggle)", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "收藏测试1", "password123");
+        const token = await registerAndLogin(
+          request,
+          "收藏测试1",
+          "password123",
+        );
 
         // Toggle favorite (should add)
         const response = await request
@@ -50,7 +54,11 @@ describe("favorites API", { concurrency: false }, () => {
   test("AC-02: DELETE /api/favorites/items/:id unfavorites an item", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "取消收藏测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "取消收藏测试",
+          "password123",
+        );
 
         // First favorite
         await request
@@ -90,7 +98,11 @@ describe("favorites API", { concurrency: false }, () => {
   test("AC-04: GET /api/favorites/items lists favorited items", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "收藏列表测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "收藏列表测试",
+          "password123",
+        );
 
         // Favorite two items
         await request
@@ -128,7 +140,11 @@ describe("favorites API", { concurrency: false }, () => {
   test("AC-05: Toggle favorite seller", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "商家收藏测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "商家收藏测试",
+          "password123",
+        );
 
         // Toggle favorite seller (should add)
         const response = await request
@@ -159,7 +175,11 @@ describe("favorites API", { concurrency: false }, () => {
   test("AC-06: GET /api/favorites/sellers lists favorited sellers", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "商家列表测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "商家列表测试",
+          "password123",
+        );
 
         // Favorite seller 1
         await request
@@ -191,7 +211,11 @@ describe("favorites API", { concurrency: false }, () => {
   test("AC-06: Item detail shows favorite status when authenticated", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "详情收藏测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "详情收藏测试",
+          "password123",
+        );
 
         // Favorite the item and seller
         await request
@@ -246,7 +270,11 @@ describe("favorites API", { concurrency: false }, () => {
   test("AC-07: Delisted item still appears in favorites list", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "下架收藏测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "下架收藏测试",
+          "password123",
+        );
 
         // Favorite item 1 (seeded with seller_id=1)
         await request
@@ -293,7 +321,11 @@ describe("favorites API", { concurrency: false }, () => {
   test("DELETE /api/favorites/items/:id is idempotent (unfavorite when not favorited)", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "幂等测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "幂等测试",
+          "password123",
+        );
 
         // Unfavorite when not favorited should return 200
         const response = await request
@@ -316,10 +348,22 @@ describe("favorites API", { concurrency: false }, () => {
 async function withApi(
   run: (
     request: ReturnType<typeof createHttpRequest>,
-    databasePaths: { authPath: string; itemsPath: string; favoritePath: string },
+    databasePaths: {
+      authPath: string;
+      itemsPath: string;
+      favoritePath: string;
+    },
   ) => Promise<void>,
-  prepare?: (databasePaths: { authPath: string; itemsPath: string; favoritePath: string }) => void,
-  seed?: (databasePaths: { authPath: string; itemsPath: string; favoritePath: string }) => void,
+  prepare?: (databasePaths: {
+    authPath: string;
+    itemsPath: string;
+    favoritePath: string;
+  }) => void,
+  seed?: (databasePaths: {
+    authPath: string;
+    itemsPath: string;
+    favoritePath: string;
+  }) => void,
 ) {
   await withTemporaryDatabases(async (databasePaths) => {
     if (seed) {
@@ -338,7 +382,11 @@ async function withApi(
 }
 
 async function withTemporaryDatabases(
-  run: (databasePaths: { authPath: string; itemsPath: string; favoritePath: string }) => Promise<void>,
+  run: (databasePaths: {
+    authPath: string;
+    itemsPath: string;
+    favoritePath: string;
+  }) => Promise<void>,
 ) {
   const directory = await mkdtemp(join(tmpdir(), "favorite-backend-test-"));
 
@@ -358,7 +406,11 @@ async function withTemporaryDatabases(
   }
 }
 
-async function openApplication(databasePaths: { authPath: string; itemsPath: string; favoritePath: string }) {
+async function openApplication(databasePaths: {
+  authPath: string;
+  itemsPath: string;
+  favoritePath: string;
+}) {
   return createApp(backendDirectory, {
     baseDir: compiledSourceDirectory,
     globalConfig: {
@@ -441,9 +493,45 @@ function seedItemsDatabase(databasePath: string) {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    insert.run(1, "测试商品1", 25.5, 3, "描述1", "书籍", 1, "admin", "active", "2026-08-10 12:00:00", "https://picsum.photos/seed/1/400/300");
-    insert.run(2, "测试商品2", 30.0, 5, "描述2", "衣物", 1, "admin", "active", "2026-08-09 12:00:00", "https://picsum.photos/seed/2/400/300");
-    insert.run(3, "测试商品3", 15.0, 0, "描述3", "书籍", 1, "admin", "active", "2026-08-08 12:00:00", "https://picsum.photos/seed/3/400/300");
+    insert.run(
+      1,
+      "测试商品1",
+      25.5,
+      3,
+      "描述1",
+      "书籍",
+      1,
+      "admin",
+      "active",
+      "2026-08-10 12:00:00",
+      "https://picsum.photos/seed/1/400/300",
+    );
+    insert.run(
+      2,
+      "测试商品2",
+      30.0,
+      5,
+      "描述2",
+      "衣物",
+      1,
+      "admin",
+      "active",
+      "2026-08-09 12:00:00",
+      "https://picsum.photos/seed/2/400/300",
+    );
+    insert.run(
+      3,
+      "测试商品3",
+      15.0,
+      0,
+      "描述3",
+      "书籍",
+      1,
+      "admin",
+      "active",
+      "2026-08-08 12:00:00",
+      "https://picsum.photos/seed/3/400/300",
+    );
   } finally {
     database.close();
   }

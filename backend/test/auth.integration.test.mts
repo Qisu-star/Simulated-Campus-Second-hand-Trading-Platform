@@ -166,10 +166,7 @@ describe("auth API integration", { concurrency: false }, () => {
         .send({ username: "logintest2", password: "wrongpassword" })
         .expect(401);
 
-      assert.equal(
-        wrongPasswordResponse.body.message,
-        "用户名或密码错误",
-      );
+      assert.equal(wrongPasswordResponse.body.message, "用户名或密码错误");
 
       const wrongUsernameResponse = await request
         .post("/api/auth/login")
@@ -177,10 +174,7 @@ describe("auth API integration", { concurrency: false }, () => {
         .send({ username: "nonexistent", password: "password123" })
         .expect(401);
 
-      assert.equal(
-        wrongUsernameResponse.body.message,
-        "用户名或密码错误",
-      );
+      assert.equal(wrongUsernameResponse.body.message, "用户名或密码错误");
     });
   });
 
@@ -288,7 +282,10 @@ describe("auth API integration", { concurrency: false }, () => {
         .put("/api/auth/password")
         .set("Authorization", `Bearer ${token}`)
         .set(JSON_REQUEST)
-        .send({ currentPassword: "wrongpassword", newPassword: "newpassword123" })
+        .send({
+          currentPassword: "wrongpassword",
+          newPassword: "newpassword123",
+        })
         .expect(400);
 
       assert.equal(response.body.message, "当前密码错误");
@@ -350,7 +347,9 @@ async function openApplication(databasePath: string) {
     baseDir: compiledSourceDirectory,
     globalConfig: {
       authDatabase: { path: databasePath },
-      itemDatabase: { path: databasePath.replace("auth.sqlite", "items.sqlite") },
+      itemDatabase: {
+        path: databasePath.replace("auth.sqlite", "items.sqlite"),
+      },
       koa: { port: null },
     },
   });

@@ -68,7 +68,11 @@ export class CartController {
     if (typeof itemId !== "number" || !Number.isInteger(itemId) || itemId < 1) {
       throw new httpError.BadRequestError("商品 ID 无效");
     }
-    if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1) {
+    if (
+      typeof quantity !== "number" ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
       throw new httpError.BadRequestError("数量必须为正整数");
     }
 
@@ -198,11 +202,18 @@ export class CartController {
       throw new httpError.BadRequestError("请求体必须是 JSON 对象");
     }
 
-    const { itemId, quantity, paymentPassword } = body as Record<string, unknown>;
+    const { itemId, quantity, paymentPassword } = body as Record<
+      string,
+      unknown
+    >;
     if (typeof itemId !== "number" || !Number.isInteger(itemId) || itemId < 1) {
       throw new httpError.BadRequestError("商品 ID 无效");
     }
-    if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1) {
+    if (
+      typeof quantity !== "number" ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
       throw new httpError.BadRequestError("数量必须为正整数");
     }
     if (typeof paymentPassword !== "string" || paymentPassword.length === 0) {
@@ -210,7 +221,12 @@ export class CartController {
     }
 
     try {
-      const result = this.cartService.buyNow(userId, itemId, quantity, paymentPassword);
+      const result = this.cartService.buyNow(
+        userId,
+        itemId,
+        quantity,
+        paymentPassword,
+      );
       return { message: "购买成功", data: { orderId: result.orderId } };
     } catch (reason) {
       if (reason instanceof Error) {

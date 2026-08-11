@@ -39,8 +39,8 @@ describe("admin review API", { concurrency: false }, () => {
         assert.equal(response.body.data.length, 2);
 
         // Items should be sorted by createdAt DESC
-        const dates = response.body.data.map(
-          (item: { createdAt: string }) => new Date(item.createdAt).getTime(),
+        const dates = response.body.data.map((item: { createdAt: string }) =>
+          new Date(item.createdAt).getTime(),
         );
         for (let i = 1; i < dates.length; i++) {
           assert.ok(
@@ -280,9 +280,7 @@ describe("admin review API", { concurrency: false }, () => {
     await withApi(
       async (request) => {
         // GET /api/admin/reviews without auth
-        const getResponse = await request
-          .get("/api/admin/reviews")
-          .expect(401);
+        const getResponse = await request.get("/api/admin/reviews").expect(401);
 
         assert.ok(getResponse.body.message);
 
@@ -389,7 +387,9 @@ async function openApplication(databasePath: string) {
     baseDir: compiledSourceDirectory,
     globalConfig: {
       itemDatabase: { path: databasePath },
-      authDatabase: { path: databasePath.replace("items.sqlite", "auth.sqlite") },
+      authDatabase: {
+        path: databasePath.replace("items.sqlite", "auth.sqlite"),
+      },
       koa: { port: null },
     },
   });
@@ -442,13 +442,29 @@ function seedPendingItems(databasePath: string) {
     `);
 
     insert.run(
-      1, "待审核商品A", 25.5, 3, "这是商品A的描述",
-      "书籍", 1, "admin", "pending", "2026-08-10 12:00:00",
+      1,
+      "待审核商品A",
+      25.5,
+      3,
+      "这是商品A的描述",
+      "书籍",
+      1,
+      "admin",
+      "pending",
+      "2026-08-10 12:00:00",
       "https://picsum.photos/seed/itemA/400/300",
     );
     insert.run(
-      2, "待审核商品B", 50.0, 1, "这是商品B的描述",
-      "电子设备", 1, "admin", "pending", "2026-08-08 12:00:00",
+      2,
+      "待审核商品B",
+      50.0,
+      1,
+      "这是商品B的描述",
+      "电子设备",
+      1,
+      "admin",
+      "pending",
+      "2026-08-08 12:00:00",
       "https://picsum.photos/seed/itemB/400/300",
     );
   } finally {

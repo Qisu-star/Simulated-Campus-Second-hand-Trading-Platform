@@ -135,17 +135,14 @@ function parseRegisterBody(value: unknown): {
 
   const username =
     typeof value.username === "string" ? value.username.trim() : "";
-  const password =
-    typeof value.password === "string" ? value.password : "";
+  const password = typeof value.password === "string" ? value.password : "";
 
   if (username.length < 1) {
     throw new httpError.BadRequestError("用户名不能为空");
   }
 
   if (!USERNAME_REGEX.test(username)) {
-    throw new httpError.BadRequestError(
-      "用户名只允许中文字符、英文字母和数字",
-    );
+    throw new httpError.BadRequestError("用户名只允许中文字符、英文字母和数字");
   }
 
   if (password.length < MIN_PASSWORD_LENGTH) {
@@ -167,8 +164,7 @@ function parseLoginBody(value: unknown): {
 
   const username =
     typeof value.username === "string" ? value.username.trim() : "";
-  const password =
-    typeof value.password === "string" ? value.password : "";
+  const password = typeof value.password === "string" ? value.password : "";
 
   if (username.length < 1) {
     throw new httpError.BadRequestError("用户名不能为空");

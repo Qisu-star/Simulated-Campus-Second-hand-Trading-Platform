@@ -33,7 +33,10 @@ function loadHistory(): string[] {
 
 function saveHistory(history: string[]) {
   try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+    localStorage.setItem(
+      HISTORY_KEY,
+      JSON.stringify(history.slice(0, MAX_HISTORY)),
+    );
   } catch {
     // localStorage may be full or unavailable
   }
@@ -120,14 +123,11 @@ export function SearchBar({ onSearch, initialKeyword = "" }: SearchBarProps) {
     setShowDropdown(true);
   }, []);
 
-  const handleClearHistory = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      saveHistory([]);
-      setHistory([]);
-    },
-    [],
-  );
+  const handleClearHistory = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    saveHistory([]);
+    setHistory([]);
+  }, []);
 
   return (
     <div ref={containerRef} className="relative">

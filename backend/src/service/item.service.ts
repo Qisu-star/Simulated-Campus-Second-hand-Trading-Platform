@@ -2,7 +2,12 @@ import { Config, Destroy, Init, Provide } from "@midwayjs/core";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { CreateItemInput, Item, ItemListResponse, UpdateItemInput } from "../interface";
+import type {
+  CreateItemInput,
+  Item,
+  ItemListResponse,
+  UpdateItemInput,
+} from "../interface";
 
 type ItemRow = {
   id: number;
@@ -20,7 +25,14 @@ type ItemRow = {
   quantity_updated_at: string | null;
 };
 
-const CATEGORIES = ["衣物", "书籍", "电子设备", "运动", "食物", "其它"] as const;
+const CATEGORIES = [
+  "衣物",
+  "书籍",
+  "电子设备",
+  "运动",
+  "食物",
+  "其它",
+] as const;
 
 const SEED_ITEMS = [
   {
@@ -177,9 +189,8 @@ export class ItemService {
       params.push(category);
     }
 
-    const whereClause = conditions.length > 0
-      ? `WHERE ${conditions.join(" AND ")}`
-      : "";
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const countRow = this.database
       .prepare(`SELECT COUNT(*) AS total FROM items ${whereClause}`)
@@ -286,20 +297,31 @@ export class ItemService {
     return [...CATEGORIES];
   }
 
-  createItem(sellerId: number, sellerName: string, input: CreateItemInput): Item {
+  createItem(
+    sellerId: number,
+    sellerName: string,
+    input: CreateItemInput,
+  ): Item {
     if (!this.database) {
       throw new Error("数据库未初始化");
     }
 
     const images = JSON.stringify(input.images || []);
-    const coverImage = input.coverImage || (input.images && input.images.length > 0 ? input.images[0] : "");
-    const quantityUpdatedAt = input.quantity === 0 ? new Date().toISOString().replace("T", " ").slice(0, 19) : null;
+    const coverImage =
+      input.coverImage ||
+      (input.images && input.images.length > 0 ? input.images[0] : "");
+    const quantityUpdatedAt =
+      input.quantity === 0
+        ? new Date().toISOString().replace("T", " ").slice(0, 19)
+        : null;
 
     const result = this.database
-      .prepare(`
+      .prepare(
+        `
         INSERT INTO items (title, price, quantity, description, images, cover_image, category, seller_id, seller_name, status, quantity_updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
-      `)
+      `,
+      )
       .run(
         input.title,
         input.price,
@@ -445,7 +467,9 @@ export class ItemService {
     }
 
     const result = this.database
-      .prepare("UPDATE items SET quantity = quantity - ? WHERE id = ? AND status = 'active' AND quantity >= ?")
+      .prepare(
+        "UPDATE items SET quantity = quantity - ? WHERE id = ? AND status = 'active' AND quantity >= ?",
+      )
       .run(quantity, itemId, quantity);
 
     return result.changes > 0;
@@ -497,7 +521,11 @@ export class ItemService {
     };
   }
 
-  listMyItems(userId: number, page: number, pageSize: number): ItemListResponse {
+  listMyItems(
+    userId: number,
+    page: number,
+    pageSize: number,
+  ): ItemListResponse {
     if (!this.database) {
       return { data: [], total: 0, totalPages: 1 };
     }
@@ -508,7 +536,9 @@ export class ItemService {
     const params: (string | number)[] = [userId];
 
     const countRow = this.database
-      .prepare(`SELECT COUNT(*) AS total FROM items WHERE ${conditions.join(" AND ")}`)
+      .prepare(
+        `SELECT COUNT(*) AS total FROM items WHERE ${conditions.join(" AND ")}`,
+      )
       .get(...params) as { total: number };
 
     const total = countRow.total;
@@ -540,7 +570,9 @@ export class ItemService {
     const params: (string | number)[] = [];
 
     const countRow = this.database
-      .prepare(`SELECT COUNT(*) AS total FROM items WHERE ${conditions.join(" AND ")}`)
+      .prepare(
+        `SELECT COUNT(*) AS total FROM items WHERE ${conditions.join(" AND ")}`,
+      )
       .get(...params) as { total: number };
 
     const total = countRow.total;
@@ -634,9 +666,7 @@ function mapItem(row: ItemRow): Item {
     sellerId: row.seller_id,
     sellerName: row.seller_name,
     status: row.status as Item["status"],
-    createdAt: new Date(
-      `${row.created_at.replace(" ", "T")}Z`,
-    ).toISOString(),
+    createdAt: new Date(`${row.created_at.replace(" ", "T")}Z`).toISOString(),
     quantityUpdatedAt: row.quantity_updated_at
       ? new Date(`${row.quantity_updated_at.replace(" ", "T")}Z`).toISOString()
       : null,

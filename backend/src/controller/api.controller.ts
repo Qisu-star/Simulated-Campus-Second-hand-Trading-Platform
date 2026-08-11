@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Headers, httpError, Inject, Param, Patch, Post, Put, Query } from "@midwayjs/core";
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  httpError,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+} from "@midwayjs/core";
 import { Context } from "@midwayjs/koa";
 import { AuthService } from "../service/auth.service";
 import { FavoriteService } from "../service/favorite.service";
@@ -91,8 +103,14 @@ export class ApiController {
     if (token) {
       const payload = verifyToken(token);
       if (payload) {
-        isItemFavorited = this.favoriteService.isItemFavorited(payload.userId, item.id);
-        isSellerFavorited = this.favoriteService.isSellerFavorited(payload.userId, item.sellerId);
+        isItemFavorited = this.favoriteService.isItemFavorited(
+          payload.userId,
+          item.id,
+        );
+        isSellerFavorited = this.favoriteService.isSellerFavorited(
+          payload.userId,
+          item.sellerId,
+        );
       }
     }
 
@@ -119,11 +137,17 @@ export class ApiController {
     }
 
     const title = typeof body.title === "string" ? body.title.trim() : "";
-    const price = typeof body.price === "number" ? body.price : Number(body.price);
-    const quantity = typeof body.quantity === "number" ? body.quantity : Number(body.quantity);
-    const category = typeof body.category === "string" ? body.category.trim() : "";
-    const description = typeof body.description === "string" ? body.description : "";
-    const images = Array.isArray(body.images) ? body.images.filter((i: unknown) => typeof i === "string") : [];
+    const price =
+      typeof body.price === "number" ? body.price : Number(body.price);
+    const quantity =
+      typeof body.quantity === "number" ? body.quantity : Number(body.quantity);
+    const category =
+      typeof body.category === "string" ? body.category.trim() : "";
+    const description =
+      typeof body.description === "string" ? body.description : "";
+    const images = Array.isArray(body.images)
+      ? body.images.filter((i: unknown) => typeof i === "string")
+      : [];
 
     // Validation
     if (!title) {
@@ -134,13 +158,19 @@ export class ApiController {
       throw new httpError.BadRequestError("商品价格必须大于 0");
     }
 
-    if (!Number.isFinite(quantity) || quantity < 0 || !Number.isInteger(quantity)) {
+    if (
+      !Number.isFinite(quantity) ||
+      quantity < 0 ||
+      !Number.isInteger(quantity)
+    ) {
       throw new httpError.BadRequestError("商品数量必须是非负整数");
     }
 
     const validCategories = this.itemService.listCategories();
     if (!category || !validCategories.includes(category)) {
-      throw new httpError.BadRequestError(`无效的商品分类，可选: ${validCategories.join(", ")}`);
+      throw new httpError.BadRequestError(
+        `无效的商品分类，可选: ${validCategories.join(", ")}`,
+      );
     }
 
     const item = this.itemService.createItem(user.userId, username, {
@@ -190,7 +220,8 @@ export class ApiController {
     }
 
     if (body.price !== undefined) {
-      const price = typeof body.price === "number" ? body.price : Number(body.price);
+      const price =
+        typeof body.price === "number" ? body.price : Number(body.price);
       if (!Number.isFinite(price) || price <= 0) {
         throw new httpError.BadRequestError("商品价格必须大于 0");
       }
@@ -198,22 +229,33 @@ export class ApiController {
     }
 
     if (body.quantity !== undefined) {
-      const quantity = typeof body.quantity === "number" ? body.quantity : Number(body.quantity);
-      if (!Number.isFinite(quantity) || quantity < 0 || !Number.isInteger(quantity)) {
+      const quantity =
+        typeof body.quantity === "number"
+          ? body.quantity
+          : Number(body.quantity);
+      if (
+        !Number.isFinite(quantity) ||
+        quantity < 0 ||
+        !Number.isInteger(quantity)
+      ) {
         throw new httpError.BadRequestError("商品数量必须是非负整数");
       }
       input.quantity = quantity;
     }
 
     if (body.description !== undefined) {
-      input.description = typeof body.description === "string" ? body.description : "";
+      input.description =
+        typeof body.description === "string" ? body.description : "";
     }
 
     if (body.category !== undefined) {
-      const category = typeof body.category === "string" ? body.category.trim() : "";
+      const category =
+        typeof body.category === "string" ? body.category.trim() : "";
       const validCategories = this.itemService.listCategories();
       if (!category || !validCategories.includes(category)) {
-        throw new httpError.BadRequestError(`无效的商品分类，可选: ${validCategories.join(", ")}`);
+        throw new httpError.BadRequestError(
+          `无效的商品分类，可选: ${validCategories.join(", ")}`,
+        );
       }
       input.category = category;
     }
@@ -226,7 +268,8 @@ export class ApiController {
     }
 
     if (body.coverImage !== undefined) {
-      input.coverImage = typeof body.coverImage === "string" ? body.coverImage : "";
+      input.coverImage =
+        typeof body.coverImage === "string" ? body.coverImage : "";
     }
 
     try {
@@ -267,7 +310,9 @@ export class ApiController {
 
     const status = typeof body.status === "string" ? body.status.trim() : "";
     if (status !== "delisted" && status !== "active") {
-      throw new httpError.BadRequestError("无效的状态，仅支持 delisted 或 active");
+      throw new httpError.BadRequestError(
+        "无效的状态，仅支持 delisted 或 active",
+      );
     }
 
     try {
@@ -322,7 +367,13 @@ export class ApiController {
       throw new httpError.NotFoundError("商家不存在");
     }
 
-    return { data: { id: seller.id, username: seller.username, createdAt: seller.createdAt } };
+    return {
+      data: {
+        id: seller.id,
+        username: seller.username,
+        createdAt: seller.createdAt,
+      },
+    };
   }
 
   @Get("/sellers/:id/reviews")
@@ -350,7 +401,9 @@ export class ApiController {
   }
 }
 
-function getCurrentUserFromToken(authorization: string | undefined): { userId: number } | null {
+function getCurrentUserFromToken(
+  authorization: string | undefined,
+): { userId: number } | null {
   if (!authorization || typeof authorization !== "string") {
     return null;
   }
@@ -382,7 +435,10 @@ function extractToken(authorization: string | undefined): string | null {
   return parts[1];
 }
 
-function getCurrentUserName(authService: AuthService, authorization: string | undefined): string | null {
+function getCurrentUserName(
+  authService: AuthService,
+  authorization: string | undefined,
+): string | null {
   if (!authorization || typeof authorization !== "string") {
     return null;
   }

@@ -34,9 +34,10 @@ function OrdersPageContent() {
   const fetchOrders = useCallback(async () => {
     setPageState("loading");
     try {
-      const endpoint = activeTab === "buy"
-        ? `/api/orders?page=${page}&pageSize=${pageSize}`
-        : `/api/orders/sales?page=${page}&pageSize=${pageSize}`;
+      const endpoint =
+        activeTab === "buy"
+          ? `/api/orders?page=${page}&pageSize=${pageSize}`
+          : `/api/orders/sales?page=${page}&pageSize=${pageSize}`;
 
       const response = await api.get<OrderListResponse>(endpoint);
 
@@ -68,28 +69,27 @@ function OrdersPageContent() {
     setPageState("loading");
   }, []);
 
-  const handleConfirmReceive = useCallback(
-    async (orderId: number) => {
-      setReceiveLoading(orderId);
-      try {
-        await api.post(`/api/orders/${orderId}/receive`);
-        setOrders((prev) =>
-          prev.map((order) =>
-            order.id === orderId ? { ...order, status: "received" as const } : order,
-          ),
-        );
-      } catch (reason) {
-        if (reason instanceof ApiError) {
-          setErrorMessage(reason.message);
-        } else {
-          setErrorMessage("操作失败");
-        }
-      } finally {
-        setReceiveLoading(null);
+  const handleConfirmReceive = useCallback(async (orderId: number) => {
+    setReceiveLoading(orderId);
+    try {
+      await api.post(`/api/orders/${orderId}/receive`);
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId
+            ? { ...order, status: "received" as const }
+            : order,
+        ),
+      );
+    } catch (reason) {
+      if (reason instanceof ApiError) {
+        setErrorMessage(reason.message);
+      } else {
+        setErrorMessage("操作失败");
       }
-    },
-    [],
-  );
+    } finally {
+      setReceiveLoading(null);
+    }
+  }, []);
 
   const statusLabel = (status: string) => {
     switch (status) {
@@ -183,7 +183,9 @@ function OrdersPageContent() {
             {activeTab === "buy" ? "暂无购买订单" : "暂无售出订单"}
           </p>
           <p className="mt-2 text-sm">
-            {activeTab === "buy" ? "去逛逛，发现心仪的商品吧" : "商品被购买后，订单会显示在这里"}
+            {activeTab === "buy"
+              ? "去逛逛，发现心仪的商品吧"
+              : "商品被购买后，订单会显示在这里"}
           </p>
           {activeTab === "buy" && (
             <a
@@ -211,7 +213,9 @@ function OrdersPageContent() {
                     <span className="text-xs text-slate-400">
                       订单 #{order.id}
                     </span>
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor(order.status)}`}>
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor(order.status)}`}
+                    >
                       {statusLabel(order.status)}
                     </span>
                   </div>
@@ -223,10 +227,7 @@ function OrdersPageContent() {
                 {/* Order items */}
                 <div className="space-y-3">
                   {order.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center gap-3"
-                    >
+                    <div key={item.id} className="flex items-center gap-3">
                       <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100">
                         <img
                           alt={item.title}
@@ -255,16 +256,19 @@ function OrdersPageContent() {
                     <span className="text-lg font-bold text-rose-600">
                       ¥{order.totalPrice.toFixed(2)}
                     </span>
-                    {activeTab === "buy" && order.status === "pending_receipt" && (
-                      <button
-                        className="rounded-xl bg-blue-700 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
-                        disabled={receiveLoading === order.id}
-                        onClick={() => void handleConfirmReceive(order.id)}
-                        type="button"
-                      >
-                        {receiveLoading === order.id ? "处理中..." : "确认签收"}
-                      </button>
-                    )}
+                    {activeTab === "buy" &&
+                      order.status === "pending_receipt" && (
+                        <button
+                          className="rounded-xl bg-blue-700 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                          disabled={receiveLoading === order.id}
+                          onClick={() => void handleConfirmReceive(order.id)}
+                          type="button"
+                        >
+                          {receiveLoading === order.id
+                            ? "处理中..."
+                            : "确认签收"}
+                        </button>
+                      )}
                   </div>
                 </div>
               </div>
@@ -303,11 +307,13 @@ function OrdersPageContent() {
 
 export default function OrdersPage() {
   return (
-    <Suspense fallback={
-      <main className="mx-auto flex min-h-screen max-w-4xl items-center justify-center px-6 py-10">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="mx-auto flex min-h-screen max-w-4xl items-center justify-center px-6 py-10">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-700" />
+        </main>
+      }
+    >
       <OrdersPageContent />
     </Suspense>
   );

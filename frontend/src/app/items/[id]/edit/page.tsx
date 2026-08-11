@@ -36,7 +36,10 @@ export default function EditItemPage({
       setErrorMessage("");
     } catch (reason) {
       if (reason instanceof Error) {
-        if (reason.message.includes("404") || reason.message.includes("不存在")) {
+        if (
+          reason.message.includes("404") ||
+          reason.message.includes("不存在")
+        ) {
           setPageState("notfound");
         } else {
           setErrorMessage(reason.message);
@@ -74,8 +77,7 @@ export default function EditItemPage({
 
       router.push("/my-items");
     } catch (reason) {
-      const message =
-        reason instanceof Error ? reason.message : "保存失败";
+      const message = reason instanceof Error ? reason.message : "保存失败";
       alert(message);
     } finally {
       setSubmitting(false);
@@ -121,9 +123,7 @@ export default function EditItemPage({
 
         {pageState === "notfound" && (
           <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-700">
-            <p className="text-lg font-semibold text-slate-900">
-              商品未找到
-            </p>
+            <p className="text-lg font-semibold text-slate-900">商品未找到</p>
             <p className="mt-2 text-sm text-slate-600">
               该商品不存在或已下架。
             </p>

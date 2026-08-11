@@ -19,7 +19,11 @@ describe("account API", { concurrency: false }, () => {
   test("AC-05: GET /api/account returns account info (auto-create)", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "账户测试1", "password123");
+        const token = await registerAndLogin(
+          request,
+          "账户测试1",
+          "password123",
+        );
 
         const response = await request
           .get("/api/account")
@@ -41,17 +45,21 @@ describe("account API", { concurrency: false }, () => {
   test("AC-06: PUT /api/account/balance sets balance", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "余额测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "余额测试",
+          "password123",
+        );
 
         // Set balance
         const setResponse = await request
           .put("/api/account/balance")
           .set("Authorization", `Bearer ${token}`)
           .set(JSON_REQUEST)
-          .send({ balance: 100.50 })
+          .send({ balance: 100.5 })
           .expect(200);
 
-        assert.equal(setResponse.body.data.balance, 100.50);
+        assert.equal(setResponse.body.data.balance, 100.5);
 
         // Verify via GET
         const getResponse = await request
@@ -60,7 +68,7 @@ describe("account API", { concurrency: false }, () => {
           .set(JSON_REQUEST)
           .expect(200);
 
-        assert.equal(getResponse.body.data.balance, 100.50);
+        assert.equal(getResponse.body.data.balance, 100.5);
       },
       (databasePaths) => {
         seedAuthDatabase(databasePaths.authPath);
@@ -71,7 +79,11 @@ describe("account API", { concurrency: false }, () => {
   test("AC-07: PUT /api/account/password with non-6-digit password returns 400", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "密码格式测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "密码格式测试",
+          "password123",
+        );
 
         // Too short
         await request
@@ -106,7 +118,11 @@ describe("account API", { concurrency: false }, () => {
   test("Set payment password and verify", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "密码验证测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "密码验证测试",
+          "password123",
+        );
 
         // Set password
         const setResponse = await request
@@ -144,10 +160,7 @@ describe("account API", { concurrency: false }, () => {
 
   test("Unauthenticated requests return 401", async () => {
     await withApi(async (request) => {
-      await request
-        .get("/api/account")
-        .set(JSON_REQUEST)
-        .expect(401);
+      await request.get("/api/account").set(JSON_REQUEST).expect(401);
 
       await request
         .put("/api/account/balance")
@@ -172,7 +185,11 @@ describe("account API", { concurrency: false }, () => {
   test("Account info shows hasPaymentPassword=true after setting password", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "密码状态测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "密码状态测试",
+          "password123",
+        );
 
         // Initially no password
         const initialResponse = await request
@@ -230,7 +247,10 @@ async function withApi(
 }
 
 async function withTemporaryDatabases(
-  run: (databasePaths: { authPath: string; accountPath: string }) => Promise<void>,
+  run: (databasePaths: {
+    authPath: string;
+    accountPath: string;
+  }) => Promise<void>,
 ) {
   const directory = await mkdtemp(join(tmpdir(), "account-backend-test-"));
 
@@ -249,7 +269,10 @@ async function withTemporaryDatabases(
   }
 }
 
-async function openApplication(databasePaths: { authPath: string; accountPath: string }) {
+async function openApplication(databasePaths: {
+  authPath: string;
+  accountPath: string;
+}) {
   return createApp(backendDirectory, {
     baseDir: compiledSourceDirectory,
     globalConfig: {

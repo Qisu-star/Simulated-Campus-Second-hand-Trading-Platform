@@ -19,7 +19,11 @@ describe("review API", { concurrency: false }, () => {
   test("AC-01: Create review as received buyer (201)", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "评价测试1", "password123");
+        const token = await registerAndLogin(
+          request,
+          "评价测试1",
+          "password123",
+        );
 
         // Set up account and buy an item
         await request
@@ -72,9 +76,15 @@ describe("review API", { concurrency: false }, () => {
         seedAuthDatabase(databasePaths.authPath);
         seedItems(databasePaths.itemPath, [
           {
-            id: 1, title: "测试商品", price: 25, quantity: 5,
-            category: "书籍", status: "active", createdAt: "2026-08-10 12:00:00",
-            sellerId: 1, sellerName: "admin",
+            id: 1,
+            title: "测试商品",
+            price: 25,
+            quantity: 5,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+            sellerId: 1,
+            sellerName: "admin",
           },
         ]);
       },
@@ -84,7 +94,11 @@ describe("review API", { concurrency: false }, () => {
   test("AC-02: Non-received buyer returns 403", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "评价测试2", "password123");
+        const token = await registerAndLogin(
+          request,
+          "评价测试2",
+          "password123",
+        );
 
         // Set up account and buy an item
         await request
@@ -123,9 +137,15 @@ describe("review API", { concurrency: false }, () => {
         seedAuthDatabase(databasePaths.authPath);
         seedItems(databasePaths.itemPath, [
           {
-            id: 1, title: "测试商品", price: 25, quantity: 5,
-            category: "书籍", status: "active", createdAt: "2026-08-10 12:00:00",
-            sellerId: 1, sellerName: "admin",
+            id: 1,
+            title: "测试商品",
+            price: 25,
+            quantity: 5,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+            sellerId: 1,
+            sellerName: "admin",
           },
         ]);
       },
@@ -135,7 +155,11 @@ describe("review API", { concurrency: false }, () => {
   test("AC-03: Rating < 1 or > 10 returns 400", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "评价测试3", "password123");
+        const token = await registerAndLogin(
+          request,
+          "评价测试3",
+          "password123",
+        );
 
         // Set up account and buy
         await request
@@ -188,9 +212,15 @@ describe("review API", { concurrency: false }, () => {
         seedAuthDatabase(databasePaths.authPath);
         seedItems(databasePaths.itemPath, [
           {
-            id: 1, title: "测试商品", price: 25, quantity: 5,
-            category: "书籍", status: "active", createdAt: "2026-08-10 12:00:00",
-            sellerId: 1, sellerName: "admin",
+            id: 1,
+            title: "测试商品",
+            price: 25,
+            quantity: 5,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+            sellerId: 1,
+            sellerName: "admin",
           },
         ]);
       },
@@ -200,7 +230,11 @@ describe("review API", { concurrency: false }, () => {
   test("AC-04: Duplicate review returns 409", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "评价测试4", "password123");
+        const token = await registerAndLogin(
+          request,
+          "评价测试4",
+          "password123",
+        );
 
         // Set up account and buy
         await request
@@ -253,9 +287,15 @@ describe("review API", { concurrency: false }, () => {
         seedAuthDatabase(databasePaths.authPath);
         seedItems(databasePaths.itemPath, [
           {
-            id: 1, title: "测试商品", price: 25, quantity: 5,
-            category: "书籍", status: "active", createdAt: "2026-08-10 12:00:00",
-            sellerId: 1, sellerName: "admin",
+            id: 1,
+            title: "测试商品",
+            price: 25,
+            quantity: 5,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+            sellerId: 1,
+            sellerName: "admin",
           },
         ]);
       },
@@ -275,7 +315,11 @@ describe("review API", { concurrency: false }, () => {
   test("AC-06: View item reviews list", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "评价测试6", "password123");
+        const token = await registerAndLogin(
+          request,
+          "评价测试6",
+          "password123",
+        );
 
         // Set up account and buy
         await request
@@ -331,9 +375,15 @@ describe("review API", { concurrency: false }, () => {
         seedAuthDatabase(databasePaths.authPath);
         seedItems(databasePaths.itemPath, [
           {
-            id: 1, title: "测试商品", price: 25, quantity: 5,
-            category: "书籍", status: "active", createdAt: "2026-08-10 12:00:00",
-            sellerId: 1, sellerName: "admin",
+            id: 1,
+            title: "测试商品",
+            price: 25,
+            quantity: 5,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+            sellerId: 1,
+            sellerName: "admin",
           },
         ]);
       },
@@ -344,7 +394,11 @@ describe("review API", { concurrency: false }, () => {
     await withApi(
       async (request) => {
         // Register buyer
-        const buyerToken = await registerAndLogin(request, "评价买家", "password123");
+        const buyerToken = await registerAndLogin(
+          request,
+          "评价买家",
+          "password123",
+        );
 
         // Set up buyer account
         await request
@@ -402,9 +456,15 @@ describe("review API", { concurrency: false }, () => {
         seedAuthDatabase(databasePaths.authPath);
         seedItems(databasePaths.itemPath, [
           {
-            id: 1, title: "测试商品", price: 25, quantity: 5,
-            category: "书籍", status: "active", createdAt: "2026-08-10 12:00:00",
-            sellerId: 1, sellerName: "admin",
+            id: 1,
+            title: "测试商品",
+            price: 25,
+            quantity: 5,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+            sellerId: 1,
+            sellerName: "admin",
           },
         ]);
       },
@@ -415,9 +475,21 @@ describe("review API", { concurrency: false }, () => {
 async function withApi(
   run: (
     request: ReturnType<typeof createHttpRequest>,
-    databasePaths: { authPath: string; itemPath: string; accountPath: string; tradePath: string; reviewPath: string },
+    databasePaths: {
+      authPath: string;
+      itemPath: string;
+      accountPath: string;
+      tradePath: string;
+      reviewPath: string;
+    },
   ) => Promise<void>,
-  seed?: (databasePaths: { authPath: string; itemPath: string; accountPath: string; tradePath: string; reviewPath: string }) => void,
+  seed?: (databasePaths: {
+    authPath: string;
+    itemPath: string;
+    accountPath: string;
+    tradePath: string;
+    reviewPath: string;
+  }) => void,
 ) {
   await withTemporaryDatabases(async (databasePaths) => {
     if (seed) {
@@ -435,7 +507,13 @@ async function withApi(
 }
 
 async function withTemporaryDatabases(
-  run: (databasePaths: { authPath: string; itemPath: string; accountPath: string; tradePath: string; reviewPath: string }) => Promise<void>,
+  run: (databasePaths: {
+    authPath: string;
+    itemPath: string;
+    accountPath: string;
+    tradePath: string;
+    reviewPath: string;
+  }) => Promise<void>,
 ) {
   const directory = await mkdtemp(join(tmpdir(), "review-backend-test-"));
 
@@ -457,7 +535,13 @@ async function withTemporaryDatabases(
   }
 }
 
-async function openApplication(databasePaths: { authPath: string; itemPath: string; accountPath: string; tradePath: string; reviewPath: string }) {
+async function openApplication(databasePaths: {
+  authPath: string;
+  itemPath: string;
+  accountPath: string;
+  tradePath: string;
+  reviewPath: string;
+}) {
   return createApp(backendDirectory, {
     baseDir: compiledSourceDirectory,
     globalConfig: {
@@ -503,17 +587,20 @@ function seedAuthDatabase(databasePath: string) {
   }
 }
 
-function seedItems(databasePath: string, items: {
-  id: number;
-  title: string;
-  price: number;
-  quantity: number;
-  category: string;
-  status: string;
-  createdAt: string;
-  sellerId?: number;
-  sellerName?: string;
-}[]) {
+function seedItems(
+  databasePath: string,
+  items: {
+    id: number;
+    title: string;
+    price: number;
+    quantity: number;
+    category: string;
+    status: string;
+    createdAt: string;
+    sellerId?: number;
+    sellerName?: string;
+  }[],
+) {
   const database = new DatabaseSync(databasePath);
 
   try {

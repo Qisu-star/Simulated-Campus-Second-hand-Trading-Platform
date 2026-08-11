@@ -37,8 +37,7 @@ export default function NewItemPage() {
 
       router.push("/my-items");
     } catch (reason) {
-      const message =
-        reason instanceof Error ? reason.message : "发布失败";
+      const message = reason instanceof Error ? reason.message : "发布失败";
       alert(message);
     } finally {
       setLoading(false);
@@ -51,9 +50,7 @@ export default function NewItemPage() {
         <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
           发布新商品
         </h1>
-        <p className="mt-1 text-slate-600">
-          填写以下信息发布你的闲置物品
-        </p>
+        <p className="mt-1 text-slate-600">填写以下信息发布你的闲置物品</p>
       </header>
 
       <section aria-label="发布商品表单">

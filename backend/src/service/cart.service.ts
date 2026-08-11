@@ -67,13 +67,17 @@ export class CartService {
 
     // Try to update existing row first
     const result = this.database
-      .prepare("UPDATE cart_items SET quantity = quantity + ? WHERE user_id = ? AND item_id = ?")
+      .prepare(
+        "UPDATE cart_items SET quantity = quantity + ? WHERE user_id = ? AND item_id = ?",
+      )
       .run(quantity, userId, itemId);
 
     if (result.changes === 0) {
       // Insert new row
       this.database
-        .prepare("INSERT INTO cart_items (user_id, item_id, quantity) VALUES (?, ?, ?)")
+        .prepare(
+          "INSERT INTO cart_items (user_id, item_id, quantity) VALUES (?, ?, ?)",
+        )
         .run(userId, itemId, quantity);
     }
   }
@@ -84,7 +88,9 @@ export class CartService {
     }
 
     const rows = this.database
-      .prepare("SELECT id, user_id, item_id, quantity, selected, created_at FROM cart_items WHERE user_id = ? ORDER BY created_at DESC")
+      .prepare(
+        "SELECT id, user_id, item_id, quantity, selected, created_at FROM cart_items WHERE user_id = ? ORDER BY created_at DESC",
+      )
       .all(userId) as CartRow[];
 
     const cartItems: CartItem[] = [];
@@ -97,7 +103,9 @@ export class CartService {
         itemId: row.item_id,
         quantity: row.quantity,
         selected: row.selected === 1,
-        createdAt: new Date(`${row.created_at.replace(" ", "T")}Z`).toISOString(),
+        createdAt: new Date(
+          `${row.created_at.replace(" ", "T")}Z`,
+        ).toISOString(),
         title: item?.title ?? "（商品已下架）",
         price: item?.price ?? 0,
         coverImage: item?.coverImage ?? "",
@@ -140,7 +148,9 @@ export class CartService {
 
     // 1. Get all selected cart items
     const rows = this.database
-      .prepare("SELECT id, user_id, item_id, quantity, selected, created_at FROM cart_items WHERE user_id = ? AND selected = 1")
+      .prepare(
+        "SELECT id, user_id, item_id, quantity, selected, created_at FROM cart_items WHERE user_id = ? AND selected = 1",
+      )
       .all(userId) as CartRow[];
 
     if (rows.length === 0) {
@@ -148,7 +158,16 @@ export class CartService {
     }
 
     // 2. Verify each item is still in stock
-    const checkoutItems: { itemId: number; quantity: number; sellerId: number; sellerName: string; title: string; price: number; coverImage: string; cartItemId: number }[] = [];
+    const checkoutItems: {
+      itemId: number;
+      quantity: number;
+      sellerId: number;
+      sellerName: string;
+      title: string;
+      price: number;
+      coverImage: string;
+      cartItemId: number;
+    }[] = [];
 
     for (const row of rows) {
       const item = this.itemService.getItemById(row.item_id);
@@ -156,7 +175,9 @@ export class CartService {
         throw new Error(`商品 ${row.item_id} 不存在或已下架`);
       }
       if (item.quantity < row.quantity) {
-        throw new Error(`商品"${item.title}"库存不足，当前库存 ${item.quantity}，需要 ${row.quantity}`);
+        throw new Error(
+          `商品"${item.title}"库存不足，当前库存 ${item.quantity}，需要 ${row.quantity}`,
+        );
       }
       checkoutItems.push({
         itemId: row.item_id,
@@ -171,10 +192,16 @@ export class CartService {
     }
 
     // 3. Calculate total price
-    const totalPrice = checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const totalPrice = checkoutItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
 
     // 4. Verify payment password
-    const isPasswordValid = this.accountService.verifyPaymentPassword(userId, paymentPassword);
+    const isPasswordValid = this.accountService.verifyPaymentPassword(
+      userId,
+      paymentPassword,
+    );
     if (!isPasswordValid) {
       throw new Error("支付密码错误");
     }
@@ -199,16 +226,25 @@ export class CartService {
     this.accountService.setBalance(userId, newBuyerBalance);
 
     // 6c. Add seller balance (group by seller)
-    const sellerTotals = new Map<number, { total: number; sellerName: string }>();
+    const sellerTotals = new Map<
+      number,
+      { total: number; sellerName: string }
+    >();
     for (const item of checkoutItems) {
-      const existing = sellerTotals.get(item.sellerId) ?? { total: 0, sellerName: item.sellerName };
+      const existing = sellerTotals.get(item.sellerId) ?? {
+        total: 0,
+        sellerName: item.sellerName,
+      };
       existing.total += item.price * item.quantity;
       sellerTotals.set(item.sellerId, existing);
     }
 
     for (const [sellerId, sellerInfo] of sellerTotals) {
       const sellerAccount = this.accountService.getOrCreateAccount(sellerId);
-      this.accountService.setBalance(sellerId, sellerAccount.balance + sellerInfo.total);
+      this.accountService.setBalance(
+        sellerId,
+        sellerAccount.balance + sellerInfo.total,
+      );
     }
 
     // 6d. Create order + order_items
@@ -221,7 +257,11 @@ export class CartService {
       coverImage: item.coverImage,
     }));
 
-    const orderId = this.orderService.createOrder(userId, totalPrice, orderItems);
+    const orderId = this.orderService.createOrder(
+      userId,
+      totalPrice,
+      orderItems,
+    );
 
     // 6e. Delete checked cart items
     const cartItemIds = checkoutItems.map((item) => item.cartItemId);
@@ -235,7 +275,12 @@ export class CartService {
     return { orderId };
   }
 
-  buyNow(userId: number, itemId: number, quantity: number, paymentPassword: string): { orderId: number } {
+  buyNow(
+    userId: number,
+    itemId: number,
+    quantity: number,
+    paymentPassword: string,
+  ): { orderId: number } {
     if (!this.database) {
       throw new Error("数据库未初始化");
     }
@@ -254,7 +299,10 @@ export class CartService {
     const totalPrice = item.price * quantity;
 
     // 3. Verify payment password
-    const isPasswordValid = this.accountService.verifyPaymentPassword(userId, paymentPassword);
+    const isPasswordValid = this.accountService.verifyPaymentPassword(
+      userId,
+      paymentPassword,
+    );
     if (!isPasswordValid) {
       throw new Error("支付密码错误");
     }
@@ -277,7 +325,10 @@ export class CartService {
 
     // 5c. Add seller balance
     const sellerAccount = this.accountService.getOrCreateAccount(item.sellerId);
-    this.accountService.setBalance(item.sellerId, sellerAccount.balance + totalPrice);
+    this.accountService.setBalance(
+      item.sellerId,
+      sellerAccount.balance + totalPrice,
+    );
 
     // 5d. Create order
     const orderId = this.orderService.createOrder(userId, totalPrice, [

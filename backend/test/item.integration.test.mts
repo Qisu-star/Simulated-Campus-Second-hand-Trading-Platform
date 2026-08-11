@@ -39,8 +39,8 @@ describe("item API integration", { concurrency: false }, () => {
         assert.equal(typeof response.body.totalPages, "number");
 
         // Items should be sorted by created_at DESC
-        const dates = response.body.data.map(
-          (item: { createdAt: string }) => new Date(item.createdAt).getTime(),
+        const dates = response.body.data.map((item: { createdAt: string }) =>
+          new Date(item.createdAt).getTime(),
         );
         for (let i = 1; i < dates.length; i++) {
           assert.ok(
@@ -241,10 +241,7 @@ describe("item API integration", { concurrency: false }, () => {
           categoryAllResponse.body.data.length,
           allResponse.body.data.length,
         );
-        assert.equal(
-          categoryAllResponse.body.total,
-          allResponse.body.total,
-        );
+        assert.equal(categoryAllResponse.body.total, allResponse.body.total);
       },
       undefined,
       (databasePath) => {
@@ -422,7 +419,10 @@ describe("item API integration", { concurrency: false }, () => {
         assert.equal(item.quantity, 3);
         assert.equal(item.description, "这是一个测试商品描述");
         assert.ok(Array.isArray(item.images));
-        assert.equal(item.coverImage, "https://picsum.photos/seed/%E6%B5%8B%E8%AF%95%E5%95%86%E5%93%81/400/300");
+        assert.equal(
+          item.coverImage,
+          "https://picsum.photos/seed/%E6%B5%8B%E8%AF%95%E5%95%86%E5%93%81/400/300",
+        );
         assert.equal(item.category, "书籍");
         assert.equal(item.sellerId, 1);
         assert.equal(item.sellerName, "测试商家");
@@ -885,7 +885,9 @@ async function openApplication(databasePath: string) {
     baseDir: compiledSourceDirectory,
     globalConfig: {
       itemDatabase: { path: databasePath },
-      authDatabase: { path: databasePath.replace("items.sqlite", "auth.sqlite") },
+      authDatabase: {
+        path: databasePath.replace("items.sqlite", "auth.sqlite"),
+      },
       koa: { port: null },
     },
   });

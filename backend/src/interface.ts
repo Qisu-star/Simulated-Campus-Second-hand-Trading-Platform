@@ -172,7 +172,7 @@ export interface Order {
   id: number;
   userId: number;
   totalPrice: number;
-  status: 'pending_receipt' | 'received';
+  status: "pending_receipt" | "received";
   createdAt: string;
   items: OrderItem[];
 }

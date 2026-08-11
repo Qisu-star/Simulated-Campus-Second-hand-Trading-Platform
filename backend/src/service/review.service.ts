@@ -2,7 +2,11 @@ import { Config, Destroy, Init, Provide } from "@midwayjs/core";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { CreateReviewInput, Review, ReviewListResponse } from "../interface";
+import type {
+  CreateReviewInput,
+  Review,
+  ReviewListResponse,
+} from "../interface";
 
 type ReviewRow = {
   id: number;
@@ -48,13 +52,21 @@ export class ReviewService {
     }
   }
 
-  createReview(userId: number, username: string, input: CreateReviewInput): Review {
+  createReview(
+    userId: number,
+    username: string,
+    input: CreateReviewInput,
+  ): Review {
     if (!this.database) {
       throw new Error("数据库未初始化");
     }
 
     // Validate rating
-    if (!Number.isInteger(input.rating) || input.rating < 1 || input.rating > 10) {
+    if (
+      !Number.isInteger(input.rating) ||
+      input.rating < 1 ||
+      input.rating > 10
+    ) {
       throw new Error("评分必须在 1-10 之间");
     }
 
@@ -71,10 +83,20 @@ export class ReviewService {
       .prepare(
         "INSERT INTO reviews (user_id, order_id, item_id, seller_id, rating, comment, username) VALUES (?, ?, ?, ?, ?, ?, ?)",
       )
-      .run(userId, input.orderId, input.itemId, 0, input.rating, input.comment || "", username);
+      .run(
+        userId,
+        input.orderId,
+        input.itemId,
+        0,
+        input.rating,
+        input.comment || "",
+        username,
+      );
 
     const row = this.database
-      .prepare("SELECT id, user_id, order_id, item_id, seller_id, rating, comment, username, created_at FROM reviews WHERE id = ?")
+      .prepare(
+        "SELECT id, user_id, order_id, item_id, seller_id, rating, comment, username, created_at FROM reviews WHERE id = ?",
+      )
       .get(result.lastInsertRowid) as ReviewRow;
 
     return mapReview(row);
@@ -90,7 +112,11 @@ export class ReviewService {
       .run(sellerId, reviewId);
   }
 
-  listReviewsByItem(itemId: number, page: number = 1, pageSize: number = 20): ReviewListResponse {
+  listReviewsByItem(
+    itemId: number,
+    page: number = 1,
+    pageSize: number = 20,
+  ): ReviewListResponse {
     if (!this.database) {
       return { data: [], total: 0, totalPages: 1 };
     }
@@ -116,13 +142,20 @@ export class ReviewService {
     };
   }
 
-  listReviewsBySeller(sellerId: number, days: number = 30, page: number = 1, pageSize: number = 20): ReviewListResponse {
+  listReviewsBySeller(
+    sellerId: number,
+    days: number = 30,
+    page: number = 1,
+    pageSize: number = 20,
+  ): ReviewListResponse {
     if (!this.database) {
       return { data: [], total: 0, totalPages: 1 };
     }
 
     const countRow = this.database
-      .prepare("SELECT COUNT(*) AS total FROM reviews WHERE seller_id = ? AND created_at >= datetime('now', ?)")
+      .prepare(
+        "SELECT COUNT(*) AS total FROM reviews WHERE seller_id = ? AND created_at >= datetime('now', ?)",
+      )
       .get(sellerId, `-${days} days`) as { total: number };
 
     const total = countRow.total;
@@ -148,7 +181,9 @@ export class ReviewService {
     }
 
     const row = this.database
-      .prepare("SELECT id FROM reviews WHERE user_id = ? AND order_id = ? AND item_id = ?")
+      .prepare(
+        "SELECT id FROM reviews WHERE user_id = ? AND order_id = ? AND item_id = ?",
+      )
       .get(userId, orderId, itemId) as { id: number } | undefined;
 
     return row !== undefined;

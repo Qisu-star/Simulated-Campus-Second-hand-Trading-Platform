@@ -42,7 +42,9 @@ export class AccountService {
     }
 
     let row = this.database
-      .prepare("SELECT id, user_id, balance, payment_password, created_at FROM accounts WHERE user_id = ?")
+      .prepare(
+        "SELECT id, user_id, balance, payment_password, created_at FROM accounts WHERE user_id = ?",
+      )
       .get(userId) as AccountRow | undefined;
 
     if (!row) {
@@ -51,7 +53,9 @@ export class AccountService {
         .run(userId);
 
       row = this.database
-        .prepare("SELECT id, user_id, balance, payment_password, created_at FROM accounts WHERE user_id = ?")
+        .prepare(
+          "SELECT id, user_id, balance, payment_password, created_at FROM accounts WHERE user_id = ?",
+        )
         .get(userId) as AccountRow;
     }
 
@@ -110,7 +114,9 @@ export class AccountService {
     }
 
     const row = this.database
-      .prepare("SELECT id, user_id, balance, payment_password, created_at FROM accounts WHERE user_id = ?")
+      .prepare(
+        "SELECT id, user_id, balance, payment_password, created_at FROM accounts WHERE user_id = ?",
+      )
       .get(userId) as AccountRow | undefined;
 
     if (!row) {

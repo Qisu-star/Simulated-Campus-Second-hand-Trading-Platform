@@ -202,7 +202,12 @@ export class FavoriteController {
     // Enrich with seller names and active item counts
     const data: FavoriteSellerWithInfo[] = result.rows.map((row) => {
       const seller = this.authService.getUserById(row.sellerId);
-      const sellerItems = this.itemService.listSellerItems(row.sellerId, undefined, 1, 1);
+      const sellerItems = this.itemService.listSellerItems(
+        row.sellerId,
+        undefined,
+        1,
+        1,
+      );
       return {
         id: row.id,
         userId,

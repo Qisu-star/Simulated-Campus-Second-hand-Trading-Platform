@@ -95,9 +95,7 @@ export class FavoriteService {
     }
 
     const row = this.database
-      .prepare(
-        "SELECT id FROM favorites WHERE user_id = ? AND seller_id = ?",
-      )
+      .prepare("SELECT id FROM favorites WHERE user_id = ? AND seller_id = ?")
       .get(userId, sellerId) as { id: number } | undefined;
 
     return !!row;
@@ -107,7 +105,11 @@ export class FavoriteService {
     userId: number,
     page: number,
     pageSize: number,
-  ): { rows: Array<{ id: number; itemId: number; createdAt: string }>; total: number; totalPages: number } {
+  ): {
+    rows: Array<{ id: number; itemId: number; createdAt: string }>;
+    total: number;
+    totalPages: number;
+  } {
     if (!this.database) {
       return { rows: [], total: 0, totalPages: 1 };
     }
@@ -136,9 +138,7 @@ export class FavoriteService {
       rows: rows.map((r) => ({
         id: r.id,
         itemId: r.item_id ?? 0,
-        createdAt: new Date(
-          `${r.created_at.replace(" ", "T")}Z`,
-        ).toISOString(),
+        createdAt: new Date(`${r.created_at.replace(" ", "T")}Z`).toISOString(),
       })),
       total,
       totalPages,
@@ -154,9 +154,7 @@ export class FavoriteService {
     }
 
     const existing = this.database
-      .prepare(
-        "SELECT id FROM favorites WHERE user_id = ? AND seller_id = ?",
-      )
+      .prepare("SELECT id FROM favorites WHERE user_id = ? AND seller_id = ?")
       .get(userId, sellerId) as { id: number } | undefined;
 
     if (existing) {
@@ -178,9 +176,7 @@ export class FavoriteService {
     }
 
     this.database
-      .prepare(
-        "DELETE FROM favorites WHERE user_id = ? AND seller_id = ?",
-      )
+      .prepare("DELETE FROM favorites WHERE user_id = ? AND seller_id = ?")
       .run(userId, sellerId);
   }
 
@@ -188,7 +184,11 @@ export class FavoriteService {
     userId: number,
     page: number,
     pageSize: number,
-  ): { rows: Array<{ id: number; sellerId: number; createdAt: string }>; total: number; totalPages: number } {
+  ): {
+    rows: Array<{ id: number; sellerId: number; createdAt: string }>;
+    total: number;
+    totalPages: number;
+  } {
     if (!this.database) {
       return { rows: [], total: 0, totalPages: 1 };
     }
@@ -217,9 +217,7 @@ export class FavoriteService {
       rows: rows.map((r) => ({
         id: r.id,
         sellerId: r.seller_id ?? 0,
-        createdAt: new Date(
-          `${r.created_at.replace(" ", "T")}Z`,
-        ).toISOString(),
+        createdAt: new Date(`${r.created_at.replace(" ", "T")}Z`).toISOString(),
       })),
       total,
       totalPages,

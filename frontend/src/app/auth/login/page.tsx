@@ -49,9 +49,7 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center px-6">
       <div className="w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="mb-2 text-2xl font-bold text-slate-900">登录</h1>
-        <p className="mb-8 text-sm text-slate-600">
-          欢迎回来，请登录你的账号
-        </p>
+        <p className="mb-8 text-sm text-slate-600">欢迎回来，请登录你的账号</p>
 
         <form className="grid gap-6" onSubmit={handleSubmit}>
           {error && (

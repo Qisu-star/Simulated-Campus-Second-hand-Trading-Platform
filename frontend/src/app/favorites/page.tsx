@@ -16,8 +16,12 @@ type TabType = "items" | "sellers";
 
 export default function FavoritesPage() {
   const [activeTab, setActiveTab] = useState<TabType>("items");
-  const [itemFavorites, setItemFavorites] = useState<FavoriteItemWithInfo[]>([]);
-  const [sellerFavorites, setSellerFavorites] = useState<FavoriteSellerWithInfo[]>([]);
+  const [itemFavorites, setItemFavorites] = useState<FavoriteItemWithInfo[]>(
+    [],
+  );
+  const [sellerFavorites, setSellerFavorites] = useState<
+    FavoriteSellerWithInfo[]
+  >([]);
   const [itemPage, setItemPage] = useState(1);
   const [sellerPage, setSellerPage] = useState(1);
   const [itemTotalPages, setItemTotalPages] = useState(1);
@@ -70,7 +74,13 @@ export default function FavoritesPage() {
     } else {
       void fetchSellerFavorites(sellerPage);
     }
-  }, [activeTab, itemPage, sellerPage, fetchItemFavorites, fetchSellerFavorites]);
+  }, [
+    activeTab,
+    itemPage,
+    sellerPage,
+    fetchItemFavorites,
+    fetchSellerFavorites,
+  ]);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10 sm:px-10 sm:py-16">
@@ -139,7 +149,9 @@ export default function FavoritesPage() {
         <>
           {itemFavorites.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500">
-              <p className="text-lg font-semibold text-slate-700">暂无收藏商品</p>
+              <p className="text-lg font-semibold text-slate-700">
+                暂无收藏商品
+              </p>
               <p className="mt-2 text-sm">去浏览商品页面，收藏感兴趣的商品吧</p>
               <a
                 className="mt-6 inline-block rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
@@ -190,7 +202,9 @@ export default function FavoritesPage() {
         <>
           {sellerFavorites.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500">
-              <p className="text-lg font-semibold text-slate-700">暂无收藏商家</p>
+              <p className="text-lg font-semibold text-slate-700">
+                暂无收藏商家
+              </p>
               <p className="mt-2 text-sm">浏览商品时，可以收藏感兴趣的商家</p>
               <a
                 className="mt-6 inline-block rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
@@ -244,7 +258,9 @@ export default function FavoritesPage() {
                   <button
                     className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={sellerPage <= 1}
-                    onClick={() => setSellerPage((prev) => Math.max(1, prev - 1))}
+                    onClick={() =>
+                      setSellerPage((prev) => Math.max(1, prev - 1))
+                    }
                     type="button"
                   >
                     上一页

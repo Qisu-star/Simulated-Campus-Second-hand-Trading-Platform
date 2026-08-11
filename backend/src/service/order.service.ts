@@ -68,13 +68,19 @@ export class OrderService {
     `);
   }
 
-  createOrder(userId: number, totalPrice: number, items: CreateOrderItemInput[]): number {
+  createOrder(
+    userId: number,
+    totalPrice: number,
+    items: CreateOrderItemInput[],
+  ): number {
     if (!this.database) {
       throw new Error("数据库未初始化");
     }
 
     const result = this.database
-      .prepare("INSERT INTO orders (user_id, total_price, status) VALUES (?, ?, 'pending_receipt')")
+      .prepare(
+        "INSERT INTO orders (user_id, total_price, status) VALUES (?, ?, 'pending_receipt')",
+      )
       .run(userId, totalPrice);
 
     const orderId = Number(result.lastInsertRowid);
@@ -84,13 +90,25 @@ export class OrderService {
     );
 
     for (const item of items) {
-      insertItem.run(orderId, item.itemId, item.sellerId, item.title, item.price, item.quantity, item.coverImage);
+      insertItem.run(
+        orderId,
+        item.itemId,
+        item.sellerId,
+        item.title,
+        item.price,
+        item.quantity,
+        item.coverImage,
+      );
     }
 
     return orderId;
   }
 
-  listOrders(userId: number, page: number = 1, pageSize: number = 20): OrderListResponse {
+  listOrders(
+    userId: number,
+    page: number = 1,
+    pageSize: number = 20,
+  ): OrderListResponse {
     if (!this.database) {
       return { data: [], total: 0, totalPages: 1 };
     }
@@ -104,7 +122,9 @@ export class OrderService {
     const offset = (page - 1) * pageSize;
 
     const rows = this.database
-      .prepare("SELECT id, user_id, total_price, status, created_at FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?")
+      .prepare(
+        "SELECT id, user_id, total_price, status, created_at FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
+      )
       .all(userId, pageSize, offset) as OrderRow[];
 
     return {
@@ -114,13 +134,19 @@ export class OrderService {
     };
   }
 
-  listSales(userId: number, page: number = 1, pageSize: number = 20): OrderListResponse {
+  listSales(
+    userId: number,
+    page: number = 1,
+    pageSize: number = 20,
+  ): OrderListResponse {
     if (!this.database) {
       return { data: [], total: 0, totalPages: 1 };
     }
 
     const countRow = this.database
-      .prepare("SELECT COUNT(DISTINCT o.id) AS total FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE oi.seller_id = ?")
+      .prepare(
+        "SELECT COUNT(DISTINCT o.id) AS total FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE oi.seller_id = ?",
+      )
       .get(userId) as { total: number };
 
     const total = countRow.total;
@@ -129,7 +155,9 @@ export class OrderService {
 
     // Get distinct order IDs with pagination
     const orderIdRows = this.database
-      .prepare("SELECT DISTINCT o.id FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE oi.seller_id = ? ORDER BY o.created_at DESC LIMIT ? OFFSET ?")
+      .prepare(
+        "SELECT DISTINCT o.id FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE oi.seller_id = ? ORDER BY o.created_at DESC LIMIT ? OFFSET ?",
+      )
       .all(userId, pageSize, offset) as { id: number }[];
 
     if (orderIdRows.length === 0) {
@@ -141,7 +169,9 @@ export class OrderService {
     // Fetch the orders by those IDs
     const placeholders = orderIds.map(() => "?").join(",");
     const orderRows = this.database
-      .prepare(`SELECT id, user_id, total_price, status, created_at FROM orders WHERE id IN (${placeholders}) ORDER BY created_at DESC`)
+      .prepare(
+        `SELECT id, user_id, total_price, status, created_at FROM orders WHERE id IN (${placeholders}) ORDER BY created_at DESC`,
+      )
       .all(...orderIds) as OrderRow[];
 
     return {
@@ -159,7 +189,8 @@ export class OrderService {
     // Verify the order belongs to this user
     const order = this.database
       .prepare("SELECT id, user_id, status FROM orders WHERE id = ?")
-      .get(orderId) as { id: number; user_id: number; status: string } | undefined;
+      .get(orderId) as
+      { id: number; user_id: number; status: string } | undefined;
 
     if (!order) {
       throw new Error("订单不存在");
@@ -184,7 +215,9 @@ export class OrderService {
     }
 
     const row = this.database
-      .prepare("SELECT id, user_id, total_price, status, created_at FROM orders WHERE id = ?")
+      .prepare(
+        "SELECT id, user_id, total_price, status, created_at FROM orders WHERE id = ?",
+      )
       .get(id) as OrderRow | undefined;
 
     if (!row) {
@@ -200,7 +233,9 @@ export class OrderService {
     }
 
     const rows = this.database
-      .prepare("SELECT id, order_id, item_id, seller_id, title, price, quantity, cover_image FROM order_items WHERE order_id = ?")
+      .prepare(
+        "SELECT id, order_id, item_id, seller_id, title, price, quantity, cover_image FROM order_items WHERE order_id = ?",
+      )
       .all(orderId) as OrderItemRow[];
 
     return rows.map((row) => ({

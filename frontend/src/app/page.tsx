@@ -112,9 +112,7 @@ export default function Home() {
         <h1 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
           校园二手集市
         </h1>
-        <p className="mt-2 text-slate-600">
-          发现校园里的好物，买卖二手物品。
-        </p>
+        <p className="mt-2 text-slate-600">发现校园里的好物，买卖二手物品。</p>
       </header>
 
       <section aria-label="分类筛选" className="mb-6">
@@ -174,9 +172,7 @@ export default function Home() {
         {pageState === "error" && (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-900">
             <p className="font-semibold">暂时无法加载商品。</p>
-            <p className="mt-2 text-sm">
-              请确认后端服务已启动：{errorMessage}
-            </p>
+            <p className="mt-2 text-sm">请确认后端服务已启动：{errorMessage}</p>
           </div>
         )}
 
