@@ -227,6 +227,61 @@ export class ItemService {
     return mapItem(row);
   }
 
+  searchItems(
+    q: string,
+    category?: string,
+    page: number = 1,
+    pageSize: number = 20,
+  ): ItemListResponse {
+    // Empty keyword delegates to listItems
+    if (!q || q.trim() === "") {
+      return this.listItems(page, pageSize, category);
+    }
+
+    if (!this.database) {
+      return { data: [], total: 0, totalPages: 1 };
+    }
+
+    this.autoDelistExpiredItems();
+
+    const keyword = `%${q.trim()}%`;
+    const conditions: string[] = [
+      "(title LIKE ? OR description LIKE ? OR category LIKE ?)",
+      "status = 'active'",
+    ];
+    const params: (string | number)[] = [keyword, keyword, keyword];
+
+    if (category && category !== "全部") {
+      conditions.push("category = ?");
+      params.push(category);
+    }
+
+    const whereClause = `WHERE ${conditions.join(" AND ")}`;
+
+    const countRow = this.database
+      .prepare(`SELECT COUNT(*) AS total FROM items ${whereClause}`)
+      .get(...params) as { total: number };
+
+    const total = countRow.total;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const offset = (page - 1) * pageSize;
+
+    const rows = this.database
+      .prepare(
+        `SELECT id, title, price, quantity, description, images, cover_image, category, seller_id, seller_name, status, created_at, quantity_updated_at
+         FROM items ${whereClause}
+         ORDER BY created_at DESC
+         LIMIT ? OFFSET ?`,
+      )
+      .all(...params, pageSize, offset) as ItemRow[];
+
+    return {
+      data: rows.map(mapItem),
+      total,
+      totalPages,
+    };
+  }
+
   listCategories(): string[] {
     return [...CATEGORIES];
   }

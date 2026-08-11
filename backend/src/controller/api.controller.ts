@@ -53,6 +53,19 @@ export class ApiController {
     return { data: this.itemService.listCategories() };
   }
 
+  @Get("/items/search")
+  async searchItems(
+    @Query("q") q: string,
+    @Query("category") category?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
+  ) {
+    const p = Math.max(1, Number(page) || 1);
+    const ps = Math.min(100, Math.max(1, Number(pageSize) || 20));
+
+    return this.itemService.searchItems(q, category, p, ps);
+  }
+
   @Get("/items/:id")
   async getItemById(@Param("id") id: string) {
     const itemId = Number(id);

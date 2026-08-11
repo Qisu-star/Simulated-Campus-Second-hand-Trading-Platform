@@ -583,6 +583,260 @@ describe("item API integration", { concurrency: false }, () => {
       },
     );
   });
+
+  test("AC-01: GET /api/items/search?q=book matches title keyword", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request
+          .get("/api/items/search?q=book")
+          .expect(200);
+
+        assert.ok(response.body.data.length > 0);
+        assert.equal(response.body.total, 2);
+
+        const titles = response.body.data.map(
+          (item: { title: string }) => item.title,
+        );
+        for (const title of titles) {
+          assert.ok(
+            title.toLowerCase().includes("book"),
+            `"${title}" should contain "book"`,
+          );
+        }
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "Textbook",
+            price: 25,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+            description: "A textbook",
+          },
+          {
+            id: 2,
+            title: "Notebook",
+            price: 15,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-05 12:00:00",
+            description: "A notebook",
+          },
+          {
+            id: 3,
+            title: "Pencil",
+            price: 5,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-01 12:00:00",
+            description: "Not related",
+          },
+        ]);
+      },
+    );
+  });
+
+  test("AC-02: GET /api/items/search?q=keyword matches description", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request
+          .get("/api/items/search?q=%E5%BF%85%E5%A4%87")
+          .expect(200);
+
+        assert.equal(response.body.data.length, 1);
+        assert.equal(response.body.data[0].title, "数据结构习题集");
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "数据结构习题集",
+            price: 15,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+            description: "考研必备",
+          },
+          {
+            id: 2,
+            title: "高等数学教材",
+            price: 25,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-05 12:00:00",
+            description: "九成新，无笔记",
+          },
+        ]);
+      },
+    );
+  });
+
+  test("AC-04: GET /api/items/search?q= returns all items (empty keyword)", async () => {
+    await withApi(
+      async (request) => {
+        const allResponse = await request.get("/api/items").expect(200);
+        const searchResponse = await request
+          .get("/api/items/search?q=")
+          .expect(200);
+
+        assert.equal(
+          searchResponse.body.data.length,
+          allResponse.body.data.length,
+        );
+        assert.equal(searchResponse.body.total, allResponse.body.total);
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "商品1",
+            price: 10,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+          },
+          {
+            id: 2,
+            title: "商品2",
+            price: 20,
+            quantity: 1,
+            category: "衣物",
+            status: "active",
+            createdAt: "2026-08-05 12:00:00",
+          },
+        ]);
+      },
+    );
+  });
+
+  test("AC-03: GET /api/items/search?q=book&category=书籍 combines search + category filter", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request
+          .get("/api/items/search?q=book&category=%E4%B9%A6%E7%B1%8D")
+          .expect(200);
+
+        for (const item of response.body.data) {
+          assert.equal(item.category, "书籍");
+        }
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "Textbook",
+            price: 25,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+          },
+          {
+            id: 2,
+            title: "Cookbook",
+            price: 30,
+            quantity: 1,
+            category: "食物",
+            status: "active",
+            createdAt: "2026-08-05 12:00:00",
+          },
+          {
+            id: 3,
+            title: "笔记本",
+            price: 15,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-01 12:00:00",
+          },
+        ]);
+      },
+    );
+  });
+
+  test("AC-06: GET /api/items/search?q=noMatch returns empty array", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request
+          .get("/api/items/search?q=xyznonexistent")
+          .expect(200);
+
+        assert.deepEqual(response.body.data, []);
+        assert.equal(response.body.total, 0);
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "商品1",
+            price: 10,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+          },
+        ]);
+      },
+    );
+  });
+
+  test("AC-05: GET /api/items/search?q=book&page=1&pageSize=1 supports pagination", async () => {
+    await withApi(
+      async (request) => {
+        const page1 = await request
+          .get("/api/items/search?q=book&page=1&pageSize=1")
+          .expect(200);
+
+        assert.equal(page1.body.data.length, 1);
+        assert.equal(page1.body.total, 2);
+        assert.equal(page1.body.totalPages, 2);
+
+        const page2 = await request
+          .get("/api/items/search?q=book&page=2&pageSize=1")
+          .expect(200);
+
+        assert.equal(page2.body.data.length, 1);
+        assert.equal(page2.body.total, 2);
+        assert.equal(page2.body.totalPages, 2);
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "Textbook",
+            price: 25,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+          },
+          {
+            id: 2,
+            title: "Notebook",
+            price: 15,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-05 12:00:00",
+          },
+        ]);
+      },
+    );
+  });
 });
 
 async function withApi(

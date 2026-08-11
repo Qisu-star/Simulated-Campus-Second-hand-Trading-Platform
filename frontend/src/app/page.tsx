@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { CategoryFilter } from "@/components/category-filter";
 import { ItemCard } from "@/components/item-card";
+import { SearchBar } from "@/components/search-bar";
 import { api } from "@/lib/api";
 import type { Category } from "@/lib/types";
 import type { Item, ItemListResponse } from "@/lib/types";
@@ -15,26 +16,39 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<Category>("全部");
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [pageState, setPageState] = useState<PageState>("loading");
   const [errorMessage, setErrorMessage] = useState("");
 
   const pageSize = 20;
 
+  const buildSearchParams = useCallback(
+    (currentPage: number, category: Category, keyword: string) => {
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        pageSize: String(pageSize),
+      });
+      if (keyword) {
+        params.set("q", keyword);
+      }
+      if (category !== "全部") {
+        params.set("category", category);
+      }
+      return params;
+    },
+    [],
+  );
+
   const fetchItems = useCallback(
-    async (currentPage: number, category: Category) => {
+    async (currentPage: number, category: Category, keyword: string) => {
       setPageState("loading");
       try {
-        const params = new URLSearchParams({
-          page: String(currentPage),
-          pageSize: String(pageSize),
-        });
-        if (category !== "全部") {
-          params.set("category", category);
-        }
+        const params = buildSearchParams(currentPage, category, keyword);
+        const endpoint = keyword
+          ? `/api/items/search?${params.toString()}`
+          : `/api/items?${params.toString()}`;
 
-        const response = await api.get<ItemListResponse>(
-          `/api/items?${params.toString()}`,
-        );
+        const response = await api.get<ItemListResponse>(endpoint);
 
         setItems(response.data);
         setTotal(response.total);
@@ -48,15 +62,25 @@ export default function Home() {
         setPageState("error");
       }
     },
-    [],
+    [buildSearchParams],
   );
 
   useEffect(() => {
-    void fetchItems(page, selectedCategory);
-  }, [page, selectedCategory, fetchItems]);
+    void fetchItems(page, selectedCategory, searchKeyword);
+  }, [page, selectedCategory, searchKeyword, fetchItems]);
 
   const handleCategoryChange = (category: Category) => {
     setSelectedCategory(category);
+    setPage(1);
+  };
+
+  const handleSearch = (keyword: string) => {
+    setSearchKeyword(keyword);
+    setPage(1);
+  };
+
+  const handleClearSearch = () => {
+    setSearchKeyword("");
     setPage(1);
   };
 
@@ -79,12 +103,41 @@ export default function Home() {
         </p>
       </header>
 
+      <section aria-label="商品搜索" className="mb-4">
+        <SearchBar
+          initialKeyword={searchKeyword}
+          onSearch={handleSearch}
+        />
+      </section>
+
       <section aria-label="分类筛选" className="mb-6">
         <CategoryFilter
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
         />
       </section>
+
+      {searchKeyword && (
+        <section aria-label="搜索结果信息" className="mb-4">
+          <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3">
+            <p className="text-sm text-blue-900">
+              搜索结果：<span className="font-semibold">"{searchKeyword}"</span>
+              {total > 0 && (
+                <span className="ml-1 text-blue-600">
+                  （共 {total} 件商品）
+                </span>
+              )}
+            </p>
+            <button
+              className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+              onClick={handleClearSearch}
+              type="button"
+            >
+              清除搜索
+            </button>
+          </div>
+        </section>
+      )}
 
       <section aria-label="商品列表" className="flex-1">
         {pageState === "loading" && (
@@ -123,10 +176,12 @@ export default function Home() {
         {pageState === "empty" && (
           <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-700">
             <p className="text-lg font-semibold text-slate-900">
-              当前没有在售商品
+              {searchKeyword ? "未找到匹配的商品" : "当前没有在售商品"}
             </p>
             <p className="mt-2 text-sm text-slate-600">
-              该分类下暂无商品，请尝试其他分类或稍后再来。
+              {searchKeyword
+                ? `没有找到与 "${searchKeyword}" 相关的商品，请尝试其他关键词。`
+                : "该分类下暂无商品，请尝试其他分类或稍后再来。"}
             </p>
           </div>
         )}
