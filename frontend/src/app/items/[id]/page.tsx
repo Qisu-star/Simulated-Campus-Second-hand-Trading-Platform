@@ -240,7 +240,7 @@ export default function ItemDetailPage({
             </div>
             <a
               className="text-sm font-medium text-slate-700 transition hover:text-slate-900"
-              href="#"
+              href={`/sellers/${item.sellerId}`}
             >
               商家：{item.sellerName}
             </a>

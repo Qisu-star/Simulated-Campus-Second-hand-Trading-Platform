@@ -468,6 +468,145 @@ paths:
                     type: array
                     items:
                       type: string
+  /api/sellers/{id}:
+    get:
+      operationId: getSellerInfo
+      summary: 获取商家基本信息
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 商家 ID
+      responses:
+        "200":
+          description: 商家信息
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SellerInfo"
+        "400":
+          description: 无效的商家 ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: 商家不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/sellers/{id}/items:
+    get:
+      operationId: listSellerItems
+      summary: 获取商家商品列表（仅含在售商品）
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 商家 ID
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: 分类筛选（可选，传"全部"或不传则不筛选）
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码，从 1 开始
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        "200":
+          description: 商品列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemListResponse"
+        "400":
+          description: 无效的商家 ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: 商家不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/sellers/{id}/reviews:
+    get:
+      operationId: listSellerReviews
+      summary: 获取商家近期评价（预留）
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 商家 ID
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码，从 1 开始
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 每页数量
+      responses:
+        "200":
+          description: 评价列表（暂为空）
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, total, totalPages]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: integer
+                  totalPages:
+                    type: integer
+        "400":
+          description: 无效的商家 ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: 商家不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     bearerAuth:
@@ -687,3 +826,14 @@ components:
           type: string
           enum: [delisted, active]
           description: 目标状态
+    SellerInfo:
+      type: object
+      required: [id, username, createdAt]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

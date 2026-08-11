@@ -293,6 +293,60 @@ export class ApiController {
       throw reason;
     }
   }
+
+  @Get("/sellers/:id/items")
+  async listSellerItems(
+    @Param("id") id: string,
+    @Query("category") category?: string,
+    @Query("page") page?: string,
+    @Query("pageSize") pageSize?: string,
+  ) {
+    const sellerId = Number(id);
+    if (!Number.isFinite(sellerId)) {
+      throw new httpError.BadRequestError("无效的商家 ID");
+    }
+
+    // Verify seller exists
+    const seller = this.authService.getUserById(sellerId);
+    if (!seller) {
+      throw new httpError.NotFoundError("商家不存在");
+    }
+
+    const p = Math.max(1, Number(page) || 1);
+    const ps = Math.min(100, Math.max(1, Number(pageSize) || 20));
+
+    return this.itemService.listSellerItems(sellerId, category, p, ps);
+  }
+
+  @Get("/sellers/:id")
+  async getSellerInfo(@Param("id") id: string) {
+    const sellerId = Number(id);
+    if (!Number.isFinite(sellerId)) {
+      throw new httpError.BadRequestError("无效的商家 ID");
+    }
+
+    const seller = this.authService.getUserById(sellerId);
+    if (!seller) {
+      throw new httpError.NotFoundError("商家不存在");
+    }
+
+    return { data: { id: seller.id, username: seller.username, createdAt: seller.createdAt } };
+  }
+
+  @Get("/sellers/:id/reviews")
+  async getSellerReviews(@Param("id") id: string) {
+    const sellerId = Number(id);
+    if (!Number.isFinite(sellerId)) {
+      throw new httpError.BadRequestError("无效的商家 ID");
+    }
+
+    const seller = this.authService.getUserById(sellerId);
+    if (!seller) {
+      throw new httpError.NotFoundError("商家不存在");
+    }
+
+    return { data: [], total: 0, totalPages: 1 };
+  }
 }
 
 function getCurrentUserFromToken(authorization: string | undefined): { userId: number } | null {

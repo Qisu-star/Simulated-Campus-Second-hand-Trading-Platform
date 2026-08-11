@@ -515,6 +515,170 @@ describe("seller item management API", { concurrency: false }, () => {
   });
 });
 
+describe("seller page API", { concurrency: false }, () => {
+  test("AC-01: GET /api/sellers/:id returns seller info", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/sellers/1").expect(200);
+
+        assert.ok(response.body.data);
+        assert.equal(response.body.data.id, 1);
+        assert.equal(response.body.data.username, "admin");
+        assert.ok(typeof response.body.data.createdAt === "string");
+      },
+      undefined,
+      (databasePath) => {
+        seedAuthDatabase(databasePath);
+      },
+    );
+  });
+
+  test("Non-existent seller returns 404", async () => {
+    await withApi(async (request) => {
+      const response = await request.get("/api/sellers/999").expect(404);
+
+      assert.ok(response.body, "should have a response body");
+    });
+  });
+
+  test("GET /api/sellers/:id/items returns only active items for seller", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/sellers/1/items").expect(200);
+
+        assert.ok(Array.isArray(response.body.data));
+        // All returned items should be active
+        for (const item of response.body.data) {
+          assert.equal(item.status, "active");
+          assert.equal(item.sellerId, 1);
+        }
+      },
+      undefined,
+      (databasePath) => {
+        seedAuthDatabase(databasePath);
+        seedSellerItems(databasePath);
+      },
+    );
+  });
+
+  test("GET /api/sellers/:id/items with category filter works", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request
+          .get("/api/sellers/1/items?category=%E4%B9%A6%E7%B1%8D")
+          .expect(200);
+
+        assert.ok(Array.isArray(response.body.data));
+        assert.equal(response.body.total, 1);
+        assert.equal(response.body.data[0].category, "书籍");
+        assert.equal(response.body.data[0].title, "卖家书籍商品");
+      },
+      undefined,
+      (databasePath) => {
+        seedAuthDatabase(databasePath);
+        seedSellerItems(databasePath);
+      },
+    );
+  });
+
+  test("GET /api/sellers/:id/items excludes non-active items", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/sellers/1/items").expect(200);
+
+        // Should not include the delisted item
+        const found = response.body.data.find(
+          (item: { title: string }) => item.title === "卖家已下架商品",
+        );
+        assert.equal(found, undefined, "should not include delisted items");
+      },
+      undefined,
+      (databasePath) => {
+        seedAuthDatabase(databasePath);
+        seedSellerItems(databasePath);
+      },
+    );
+  });
+
+  test("GET /api/sellers/:id/reviews returns empty array", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/sellers/1/reviews").expect(200);
+
+        assert.deepEqual(response.body.data, []);
+        assert.equal(response.body.total, 0);
+        assert.equal(response.body.totalPages, 1);
+      },
+      undefined,
+      (databasePath) => {
+        seedAuthDatabase(databasePath);
+      },
+    );
+  });
+
+  test("Non-existent seller for items returns 404", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/sellers/999/items").expect(404);
+
+        assert.ok(response.body, "should have a response body");
+      },
+      undefined,
+      (databasePath) => {
+        seedAuthDatabase(databasePath);
+      },
+    );
+  });
+
+  test("Non-existent seller for reviews returns 404", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/sellers/999/reviews").expect(404);
+
+        assert.ok(response.body, "should have a response body");
+      },
+      undefined,
+      (databasePath) => {
+        seedAuthDatabase(databasePath);
+      },
+    );
+  });
+
+  test("GET /api/sellers/:id returns 400 for invalid id", async () => {
+    await withApi(async (request) => {
+      const response = await request.get("/api/sellers/abc").expect(400);
+
+      assert.ok(response.body, "should have a response body");
+    });
+  });
+
+  test("GET /api/sellers/:id/items supports pagination", async () => {
+    await withApi(
+      async (request) => {
+        const page1 = await request
+          .get("/api/sellers/1/items?page=1&pageSize=2")
+          .expect(200);
+
+        assert.equal(page1.body.data.length, 2);
+        assert.equal(page1.body.total, 3);
+        assert.equal(page1.body.totalPages, 2);
+
+        const page2 = await request
+          .get("/api/sellers/1/items?page=2&pageSize=2")
+          .expect(200);
+
+        assert.equal(page2.body.data.length, 1);
+        assert.equal(page2.body.total, 3);
+      },
+      undefined,
+      (databasePath) => {
+        seedAuthDatabase(databasePath);
+        seedSellerItems(databasePath);
+      },
+    );
+  });
+});
+
 async function withApi(
   run: (
     request: ReturnType<typeof createHttpRequest>,
@@ -647,6 +811,49 @@ function seedAutoDelistItems(databasePath: string) {
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(998, "近期售罄商品", 20, 0, "库存为0但未超过7天", "电子设备", 1, "admin", "active", threeDaysAgo);
+  } finally {
+    database.close();
+  }
+}
+
+function seedSellerItems(databasePath: string) {
+  const database = new DatabaseSync(databasePath);
+
+  try {
+    database.exec(`
+      CREATE TABLE IF NOT EXISTS items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        price REAL NOT NULL,
+        quantity INTEGER NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        images TEXT NOT NULL DEFAULT '[]',
+        cover_image TEXT NOT NULL DEFAULT '',
+        category TEXT NOT NULL,
+        seller_id INTEGER NOT NULL DEFAULT 1,
+        seller_name TEXT NOT NULL DEFAULT 'admin',
+        status TEXT NOT NULL DEFAULT 'active',
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        quantity_updated_at TEXT
+      )
+    `);
+
+    const insert = database.prepare(`
+      INSERT INTO items (id, title, price, quantity, description, category, seller_id, seller_name, status, created_at, cover_image)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const coverImage = "https://picsum.photos/seed/test/400/300";
+
+    // Active items for seller 1
+    insert.run(1, "卖家书籍商品", 25, 1, "书籍描述", "书籍", 1, "seller1", "active", "2026-08-10 12:00:00", coverImage);
+    insert.run(2, "卖家衣物商品", 30, 5, "衣物描述", "衣物", 1, "seller1", "active", "2026-08-08 12:00:00", coverImage);
+    insert.run(3, "卖家电子设备", 100, 2, "电子设备描述", "电子设备", 1, "seller1", "active", "2026-08-05 12:00:00", coverImage);
+
+    // Delisted item for seller 1 (should NOT appear in seller items)
+    insert.run(4, "卖家已下架商品", 50, 0, "已下架", "书籍", 1, "seller1", "delisted", "2026-08-01 12:00:00", coverImage);
+
+    // Active item for seller 2 (should NOT appear when querying seller 1)
+    insert.run(5, "其他商家商品", 40, 3, "其他商家", "运动", 2, "seller2", "active", "2026-08-03 12:00:00", coverImage);
   } finally {
     database.close();
   }

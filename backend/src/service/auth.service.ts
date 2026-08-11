@@ -111,6 +111,13 @@ export class AuthService {
     return mapUser(row);
   }
 
+  getUserById(id: number): User | null {
+    const row = this.database
+      .prepare("SELECT id, username, role, created_at FROM users WHERE id = ?")
+      .get(id) as UserRow | undefined;
+    return row ? mapUser(row) : null;
+  }
+
   updatePassword(token: string, currentPassword: string, newPassword: string): void {
     const payload = verifyToken(token);
     if (!payload) {
