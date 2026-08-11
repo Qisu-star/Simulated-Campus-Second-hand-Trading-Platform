@@ -24,5 +24,10 @@
     "eslint-config-next": "^16.2.10",
     "tailwindcss": "^4.3.2",
     "typescript": "^5.9.3"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "4.3.3",
+    "@tailwindcss/oxide-linux-x64-musl": "4.3.3",
+    "@tailwindcss/oxide-wasm32-wasi": "4.3.3"
   }
 }
