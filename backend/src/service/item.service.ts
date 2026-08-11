@@ -205,6 +205,28 @@ export class ItemService {
     };
   }
 
+  getItemById(id: number): Item | null {
+    if (!this.database) {
+      return null;
+    }
+
+    this.autoDelistExpiredItems();
+
+    const row = this.database
+      .prepare(
+        `SELECT id, title, price, quantity, description, images, cover_image, category, seller_id, seller_name, status, created_at, quantity_updated_at
+         FROM items
+         WHERE id = ? AND status = 'active'`,
+      )
+      .get(id) as ItemRow | undefined;
+
+    if (!row) {
+      return null;
+    }
+
+    return mapItem(row);
+  }
+
   listCategories(): string[] {
     return [...CATEGORIES];
   }

@@ -407,6 +407,182 @@ describe("item API integration", { concurrency: false }, () => {
       },
     );
   });
+
+  test("AC-01: GET /api/items/:id returns active item with full details", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/items/1").expect(200);
+
+        assert.ok(response.body.data);
+        const item = response.body.data;
+
+        assert.equal(item.id, 1);
+        assert.equal(item.title, "测试商品");
+        assert.equal(item.price, 25.5);
+        assert.equal(item.quantity, 3);
+        assert.equal(item.description, "这是一个测试商品描述");
+        assert.ok(Array.isArray(item.images));
+        assert.equal(item.coverImage, "https://picsum.photos/seed/%E6%B5%8B%E8%AF%95%E5%95%86%E5%93%81/400/300");
+        assert.equal(item.category, "书籍");
+        assert.equal(item.sellerId, 1);
+        assert.equal(item.sellerName, "测试商家");
+        assert.equal(item.status, "active");
+        assert.ok(typeof item.createdAt === "string");
+        assert.equal(item.quantityUpdatedAt, null);
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "测试商品",
+            price: 25.5,
+            quantity: 3,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+            sellerId: 1,
+            sellerName: "测试商家",
+            description: "这是一个测试商品描述",
+          },
+        ]);
+      },
+    );
+  });
+
+  test("AC-05: GET /api/items/:id returns 404 for non-active item", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/items/1").expect(404);
+
+        assert.ok(response.body, "should have a response body");
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "已下架商品",
+            price: 10,
+            quantity: 1,
+            category: "书籍",
+            status: "delisted",
+            createdAt: "2026-08-10 12:00:00",
+          },
+        ]);
+      },
+    );
+  });
+
+  test("GET /api/items/:id returns 404 for non-existent item", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/items/999").expect(404);
+
+        assert.ok(response.body, "should have a response body");
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "商品1",
+            price: 10,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+          },
+        ]);
+      },
+    );
+  });
+
+  test("GET /api/items/:id returns 400 for invalid id", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/items/abc").expect(400);
+
+        assert.ok(response.body, "should have a response body");
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "商品1",
+            price: 10,
+            quantity: 1,
+            category: "书籍",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+          },
+        ]);
+      },
+    );
+  });
+
+  test("GET /api/items/:id item has all required fields", async () => {
+    await withApi(
+      async (request) => {
+        const response = await request.get("/api/items/1").expect(200);
+
+        const item = response.body.data;
+        const requiredFields = [
+          "id",
+          "title",
+          "price",
+          "quantity",
+          "description",
+          "images",
+          "coverImage",
+          "category",
+          "sellerId",
+          "sellerName",
+          "status",
+          "createdAt",
+        ];
+
+        for (const field of requiredFields) {
+          assert.ok(
+            Object.prototype.hasOwnProperty.call(item, field),
+            `item should have field "${field}"`,
+          );
+        }
+
+        // Verify types
+        assert.equal(typeof item.id, "number");
+        assert.equal(typeof item.title, "string");
+        assert.equal(typeof item.price, "number");
+        assert.equal(typeof item.quantity, "number");
+        assert.equal(typeof item.description, "string");
+        assert.ok(Array.isArray(item.images));
+        assert.equal(typeof item.coverImage, "string");
+        assert.equal(typeof item.category, "string");
+        assert.equal(typeof item.sellerId, "number");
+        assert.equal(typeof item.sellerName, "string");
+        assert.equal(typeof item.status, "string");
+        assert.equal(typeof item.createdAt, "string");
+      },
+      undefined,
+      (databasePath) => {
+        seedItems(databasePath, [
+          {
+            id: 1,
+            title: "完整商品",
+            price: 99.99,
+            quantity: 5,
+            category: "电子设备",
+            status: "active",
+            createdAt: "2026-08-10 12:00:00",
+            sellerId: 1,
+            sellerName: "商家",
+            description: "完整描述",
+          },
+        ]);
+      },
+    );
+  });
 });
 
 async function withApi(

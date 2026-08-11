@@ -20,6 +20,10 @@ export interface ItemListResponse {
   totalPages: number;
 }
 
+export interface ItemDetailResponse {
+  data: Item;
+}
+
 export type Category = "全部" | "衣物" | "书籍" | "电子设备" | "运动" | "食物" | "其它";
 
 export const CATEGORIES: Category[] = [

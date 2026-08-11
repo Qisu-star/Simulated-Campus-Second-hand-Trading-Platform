@@ -1,4 +1,4 @@
-import { Body, Controller, Get, httpError, Inject, Post, Query } from "@midwayjs/core";
+import { Body, Controller, Get, httpError, Inject, Param, Post, Query } from "@midwayjs/core";
 import { CourseService } from "../service/course.service";
 import { ItemService } from "../service/item.service";
 import { parseCourseInput } from "../utils/course-input";
@@ -51,5 +51,20 @@ export class ApiController {
   @Get("/categories")
   async listCategories() {
     return { data: this.itemService.listCategories() };
+  }
+
+  @Get("/items/:id")
+  async getItemById(@Param("id") id: string) {
+    const itemId = Number(id);
+    if (!Number.isFinite(itemId)) {
+      throw new httpError.BadRequestError("无效的商品 ID");
+    }
+
+    const item = this.itemService.getItemById(itemId);
+    if (!item) {
+      throw new httpError.NotFoundError("商品不存在或已下架");
+    }
+
+    return { data: item };
   }
 }

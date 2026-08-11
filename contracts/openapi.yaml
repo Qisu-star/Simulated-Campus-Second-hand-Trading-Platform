@@ -218,6 +218,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ItemListResponse"
+  /api/items/{id}:
+    get:
+      operationId: getItemById
+      summary: 获取商品详情
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 商品 ID
+      responses:
+        "200":
+          description: 商品详情
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Item"
+        "400":
+          description: 无效的商品 ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: 商品不存在或已下架
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/categories:
     get:
       operationId: listCategories

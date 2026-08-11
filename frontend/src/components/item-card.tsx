@@ -12,7 +12,7 @@ export function ItemCard({ item }: ItemCardProps) {
   return (
     <a
       className="group block min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-      href="#"
+      href={`/items/${item.id}`}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
         <img
