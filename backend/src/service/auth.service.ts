@@ -57,19 +57,18 @@ export class AuthService {
   }
 
   register(username: string, password: string): { user: User; token: string } {
-    // Check if username already exists
-    const existing = this.database
-      .prepare("SELECT id FROM users WHERE username = ?")
-      .get(username) as UserRow | undefined;
-
-    if (existing) {
-      throw new Error("用户名已存在");
-    }
-
     const hashedPassword = hashPassword(password);
-    const result = this.database
-      .prepare("INSERT INTO users (username, password) VALUES (?, ?)")
-      .run(username, hashedPassword);
+    let result;
+    try {
+      result = this.database
+        .prepare("INSERT INTO users (username, password) VALUES (?, ?)")
+        .run(username, hashedPassword);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes("UNIQUE")) {
+        throw new Error("用户名已存在");
+      }
+      throw err;
+    }
 
     const row = this.database
       .prepare(

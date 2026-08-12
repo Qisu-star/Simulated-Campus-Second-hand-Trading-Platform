@@ -1,0 +1,41 @@
+# =============================================================================
+# Docker Compose — 校园二手集市 (Campus Trading Platform)
+# =============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: campus-trading-platform:latest
+    container_name: campus-trading
+    ports:
+      # Frontend: http://localhost:3000
+      - "3000:3000"
+      # Backend API: http://localhost:7001 (optional, proxied via frontend)
+      - "7001:7001"
+    environment:
+      # Backend config
+      - BACKEND_PORT=7001
+      - AUTH_DATABASE_PATH=/app/data/auth.sqlite
+      - ITEM_DATABASE_PATH=/app/data/items.sqlite
+      - FAVORITE_DATABASE_PATH=/app/data/favorite.sqlite
+      - ACCOUNT_DATABASE_PATH=/app/data/account.sqlite
+      - TRADE_DATABASE_PATH=/app/data/trade.sqlite
+      - REVIEW_DATABASE_PATH=/app/data/review.sqlite
+
+      # Frontend config
+      - FRONTEND_PORT=3000
+      - BACKEND_INTERNAL_URL=http://127.0.0.1:7001
+    volumes:
+      # Persistent database files (SQLite)
+      - campus-data:/app/data
+      # Persistent user uploads
+      - campus-uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  campus-data:
+    name: campus-trading-data
+  campus-uploads:
+    name: campus-trading-uploads

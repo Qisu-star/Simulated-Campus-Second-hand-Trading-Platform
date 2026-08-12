@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { clearAuth, getStoredUser, isAuthenticated } from "@/lib/auth";
 
@@ -11,14 +12,17 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
-  // Wait for client-side hydration before accessing localStorage
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
+  // Re-read auth state when route changes (e.g., after login redirect)
   const user = mounted ? getStoredUser() : null;
   const loggedIn = mounted ? isAuthenticated() : false;
+
+  // Wait for client-side hydration before accessing localStorage.
+  // Re-run on pathname changes so auth state is re-read after login redirect.
+  useEffect(() => {
+    setMounted(true);
+  }, [pathname]);
 
   // Close dropdown on click outside
   useEffect(() => {

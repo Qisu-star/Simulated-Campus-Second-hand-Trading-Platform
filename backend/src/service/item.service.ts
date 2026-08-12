@@ -475,6 +475,16 @@ export class ItemService {
     return result.changes > 0;
   }
 
+  restoreStock(itemId: number, quantity: number): void {
+    if (!this.database) {
+      return;
+    }
+
+    this.database
+      .prepare("UPDATE items SET quantity = quantity + ? WHERE id = ?")
+      .run(quantity, itemId);
+  }
+
   listSellerItems(
     sellerId: number,
     category?: string,

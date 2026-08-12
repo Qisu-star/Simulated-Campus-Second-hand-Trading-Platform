@@ -212,64 +212,90 @@ export class CartService {
       throw new Error("余额不足");
     }
 
-    // 6. Execute destructive operations in sequence
-    // 6a. Deduct stock for each item
-    for (const item of checkoutItems) {
-      const success = this.itemService.deductStock(item.itemId, item.quantity);
-      if (!success) {
-        throw new Error(`商品"${item.title}"库存不足`);
+    // 6. Execute destructive operations with rollback support
+    // Track what was done for rollback
+    const deductedItems: { itemId: number; quantity: number }[] = [];
+    let buyerBalanceAdjusted = false;
+    const sellerAdjustments: { sellerId: number; amount: number }[] = [];
+    let orderCreated = false;
+    let orderId = 0;
+
+    try {
+      // 6a. Deduct stock for each item
+      for (const item of checkoutItems) {
+        const success = this.itemService.deductStock(item.itemId, item.quantity);
+        if (!success) {
+          throw new Error(`商品"${item.title}"库存不足`);
+        }
+        deductedItems.push({ itemId: item.itemId, quantity: item.quantity });
       }
-    }
 
-    // 6b. Deduct buyer balance
-    const newBuyerBalance = account.balance - totalPrice;
-    this.accountService.setBalance(userId, newBuyerBalance);
+      // 6b. Deduct buyer balance (atomic)
+      this.accountService.adjustBalance(userId, -totalPrice);
+      buyerBalanceAdjusted = true;
 
-    // 6c. Add seller balance (group by seller)
-    const sellerTotals = new Map<
-      number,
-      { total: number; sellerName: string }
-    >();
-    for (const item of checkoutItems) {
-      const existing = sellerTotals.get(item.sellerId) ?? {
-        total: 0,
-        sellerName: item.sellerName,
-      };
-      existing.total += item.price * item.quantity;
-      sellerTotals.set(item.sellerId, existing);
-    }
+      // 6c. Add seller balance (atomic, grouped by seller)
+      const sellerTotals = new Map<
+        number,
+        { total: number; sellerName: string }
+      >();
+      for (const item of checkoutItems) {
+        const existing = sellerTotals.get(item.sellerId) ?? {
+          total: 0,
+          sellerName: item.sellerName,
+        };
+        existing.total += item.price * item.quantity;
+        sellerTotals.set(item.sellerId, existing);
+      }
 
-    for (const [sellerId, sellerInfo] of sellerTotals) {
-      const sellerAccount = this.accountService.getOrCreateAccount(sellerId);
-      this.accountService.setBalance(
-        sellerId,
-        sellerAccount.balance + sellerInfo.total,
-      );
-    }
+      for (const [sellerId, sellerInfo] of sellerTotals) {
+        this.accountService.adjustBalance(sellerId, sellerInfo.total);
+        sellerAdjustments.push({ sellerId, amount: sellerInfo.total });
+      }
 
-    // 6d. Create order + order_items
-    const orderItems = checkoutItems.map((item) => ({
-      itemId: item.itemId,
-      sellerId: item.sellerId,
-      title: item.title,
-      price: item.price,
-      quantity: item.quantity,
-      coverImage: item.coverImage,
-    }));
+      // 6d. Create order + order_items
+      const orderItems = checkoutItems.map((item) => ({
+        itemId: item.itemId,
+        sellerId: item.sellerId,
+        title: item.title,
+        price: item.price,
+        quantity: item.quantity,
+        coverImage: item.coverImage,
+      }));
 
-    const orderId = this.orderService.createOrder(
-      userId,
-      totalPrice,
-      orderItems,
-    );
+      orderId = this.orderService.createOrder(userId, totalPrice, orderItems);
+      orderCreated = true;
 
-    // 6e. Delete checked cart items
-    const cartItemIds = checkoutItems.map((item) => item.cartItemId);
-    // Use a single exec for DELETE
-    for (const cartItemId of cartItemIds) {
-      this.database
-        .prepare("DELETE FROM cart_items WHERE id = ?")
-        .run(cartItemId);
+      // 6e. Delete checked cart items
+      const cartItemIds = checkoutItems.map((item) => item.cartItemId);
+      for (const cartItemId of cartItemIds) {
+        this.database
+          .prepare("DELETE FROM cart_items WHERE id = ?")
+          .run(cartItemId);
+      }
+    } catch (err) {
+      // Rollback: undo all completed operations in reverse order
+      if (orderCreated) {
+        // Order created but we can't easily delete it — the user can see a failed order
+        // This is a known limitation with distributed compensation
+      }
+
+      // Reverse seller balance adjustments
+      for (const adj of sellerAdjustments) {
+        this.accountService.adjustBalance(adj.sellerId, -adj.amount);
+      }
+
+      // Reverse buyer balance deduction
+      if (buyerBalanceAdjusted) {
+        this.accountService.adjustBalance(userId, totalPrice);
+      }
+
+      // Restore stock
+      for (const item of deductedItems) {
+        this.itemService.restoreStock(item.itemId, item.quantity);
+      }
+
+      throw err;
     }
 
     return { orderId };
@@ -313,34 +339,52 @@ export class CartService {
       throw new Error("余额不足");
     }
 
-    // 5. Execute destructive operations
-    // 5a. Deduct stock
-    const success = this.itemService.deductStock(itemId, quantity);
-    if (!success) {
-      throw new Error("商品已售罄");
+    // 5. Execute destructive operations with rollback support
+    let stockDeducted = false;
+    let buyerBalanceAdjusted = false;
+    let sellerBalanceAdjusted = false;
+    let orderId = 0;
+
+    try {
+      // 5a. Deduct stock
+      const success = this.itemService.deductStock(itemId, quantity);
+      if (!success) {
+        throw new Error("商品已售罄");
+      }
+      stockDeducted = true;
+
+      // 5b. Deduct buyer balance (atomic)
+      this.accountService.adjustBalance(userId, -totalPrice);
+      buyerBalanceAdjusted = true;
+
+      // 5c. Add seller balance (atomic)
+      this.accountService.adjustBalance(item.sellerId, totalPrice);
+      sellerBalanceAdjusted = true;
+
+      // 5d. Create order
+      orderId = this.orderService.createOrder(userId, totalPrice, [
+        {
+          itemId: item.id,
+          sellerId: item.sellerId,
+          title: item.title,
+          price: item.price,
+          quantity,
+          coverImage: item.coverImage,
+        },
+      ]);
+    } catch (err) {
+      // Rollback: undo completed operations in reverse order
+      if (sellerBalanceAdjusted) {
+        this.accountService.adjustBalance(item.sellerId, -totalPrice);
+      }
+      if (buyerBalanceAdjusted) {
+        this.accountService.adjustBalance(userId, totalPrice);
+      }
+      if (stockDeducted) {
+        this.itemService.restoreStock(itemId, quantity);
+      }
+      throw err;
     }
-
-    // 5b. Deduct buyer balance
-    this.accountService.setBalance(userId, account.balance - totalPrice);
-
-    // 5c. Add seller balance
-    const sellerAccount = this.accountService.getOrCreateAccount(item.sellerId);
-    this.accountService.setBalance(
-      item.sellerId,
-      sellerAccount.balance + totalPrice,
-    );
-
-    // 5d. Create order
-    const orderId = this.orderService.createOrder(userId, totalPrice, [
-      {
-        itemId: item.id,
-        sellerId: item.sellerId,
-        title: item.title,
-        price: item.price,
-        quantity,
-        coverImage: item.coverImage,
-      },
-    ]);
 
     return { orderId };
   }

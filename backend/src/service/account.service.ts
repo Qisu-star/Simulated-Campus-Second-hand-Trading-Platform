@@ -75,6 +75,20 @@ export class AccountService {
       .run(balance, userId);
   }
 
+  /**
+   * Atomically adjust balance by a delta (positive or negative).
+   * This is safe against concurrent read-modify-write race conditions.
+   */
+  adjustBalance(userId: number, delta: number): void {
+    if (!this.database) {
+      throw new Error("数据库未初始化");
+    }
+
+    this.database
+      .prepare("UPDATE accounts SET balance = balance + ? WHERE user_id = ?")
+      .run(delta, userId);
+  }
+
   setPaymentPassword(userId: number, password: string): void {
     if (!this.database) {
       throw new Error("数据库未初始化");
