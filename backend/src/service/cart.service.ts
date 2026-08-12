@@ -223,7 +223,10 @@ export class CartService {
     try {
       // 6a. Deduct stock for each item
       for (const item of checkoutItems) {
-        const success = this.itemService.deductStock(item.itemId, item.quantity);
+        const success = this.itemService.deductStock(
+          item.itemId,
+          item.quantity,
+        );
         if (!success) {
           throw new Error(`商品"${item.title}"库存不足`);
         }

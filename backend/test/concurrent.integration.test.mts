@@ -56,7 +56,11 @@ describe("concurrent race condition tests", { concurrency: false }, () => {
   test("CR-02: Checkout rollback — stock restored on payment failure", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "回滚测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "回滚测试",
+          "password123",
+        );
 
         // Set payment password and balance
         await request
@@ -225,7 +229,11 @@ describe("concurrent race condition tests", { concurrency: false }, () => {
   test("CR-04: Atomic adjustBalance — no read-modify-write race", async () => {
     await withApi(
       async (request) => {
-        const token = await registerAndLogin(request, "余额原子测试", "password123");
+        const token = await registerAndLogin(
+          request,
+          "余额原子测试",
+          "password123",
+        );
 
         // Set payment password and initial balance
         await request
